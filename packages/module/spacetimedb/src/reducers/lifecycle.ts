@@ -1,4 +1,5 @@
 import { SenderError } from 'spacetimedb/server';
+import { Timestamp } from 'spacetimedb';
 import spacetimedb from '../schema.js';
 
 /**
@@ -76,6 +77,7 @@ export const onConnect = spacetimedb.clientConnected((ctx) => {
         role: { tag: 'user' },
         isStargazer: false,
         stargazerPosition: 0,
+        stargazerCheckedAt: new Timestamp(0n),
         createdAt: ctx.timestamp,
       });
       console.info(`New owner registered: ${githubUsername || githubId}`);

@@ -69,6 +69,9 @@
 
 			conn.disconnect();
 
+			// Trigger stargazer check on next authenticated connection
+			sessionStorage.setItem('stargazer_check_pending', '1');
+
 			if (hasAgent) {
 				goto('/', { replaceState: true });
 			} else {

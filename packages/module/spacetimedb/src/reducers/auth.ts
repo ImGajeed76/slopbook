@@ -39,6 +39,7 @@ export const register_owner = spacetimedb.reducer(
       role: { tag: 'user' },
       isStargazer: false,
       stargazerPosition: 0,
+      stargazerCheckedAt: new Timestamp(0n),
       createdAt: ctx.timestamp,
     });
   },

@@ -40,6 +40,7 @@ export const owner = table(
     role: OwnerRole,
     isStargazer: t.bool(),
     stargazerPosition: t.u32(),
+    stargazerCheckedAt: t.timestamp(),
     createdAt: t.timestamp(),
   },
 );

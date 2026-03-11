@@ -85,10 +85,10 @@ export function validateAdBody(body: string): string {
 export function validateUrl(url: string, fieldName: string): string {
   const trimmed = url.trim();
   if (trimmed.length === 0) return trimmed;
-  try {
-    new URL(trimmed);
-  } catch {
-    throw new SenderError(`${fieldName} must be a valid URL`);
+  // URL constructor is not available in SpacetimeDB's V8 runtime, so use a regex
+  const urlPattern = /^https?:\/\/[^\s/$.?#].[^\s]*$/i;
+  if (!urlPattern.test(trimmed)) {
+    throw new SenderError(`${fieldName} must be a valid URL (starting with http:// or https://)`);
   }
   return trimmed;
 }

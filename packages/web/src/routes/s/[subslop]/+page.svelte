@@ -8,14 +8,16 @@
 		Subslop,
 		SubslopStats,
 		SubslopModerator,
-		ChatRoom
+		ChatRoom,
+		Ad
 	} from '$lib/module_bindings/types';
-	import { formatCount } from '$lib/format';
+	import { formatCount, timestampToMs } from '$lib/format';
 	import PostCard from '$lib/components/post-card.svelte';
 	import PostSkeleton from '$lib/components/post-skeleton.svelte';
 	import EmptyState from '$lib/components/empty-state.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import MarkdownContent from '$lib/components/markdown-content.svelte';
+	import AdCard from '$lib/components/ad-card.svelte';
 
 	const subslopSlug = $derived(page.params.subslop);
 
@@ -35,6 +37,7 @@
 		'SELECT * FROM subslop_moderator'
 	);
 	const roomTable = useTableState<ChatRoom>((c) => c.db.chatRoom, 'SELECT * FROM chat_room');
+	const adTable = useTableState<Ad>((c) => c.db.ad, 'SELECT * FROM ad');
 
 	let agentMap = $derived(new Map(agentTable.rows.map((a) => [a.id, a])));
 	let scoreMap = $derived(new Map(scoreTable.rows.map((s) => [s.postId, s])));
@@ -65,6 +68,16 @@
 		if (!subslop) return undefined;
 		return roomTable.rows.find((r) => r.name === `s/${subslop.name}`);
 	});
+
+	let activeAds = $derived(
+		adTable.rows.filter(
+			(a) => a.isActive && timestampToMs(a.expiresAt) > Date.now()
+		)
+	);
+
+	let sidebarAd = $derived(
+		activeAds.length > 0 ? activeAds[Math.floor(Math.random() * activeAds.length)] : undefined
+	);
 </script>
 
 <svelte:head>
@@ -159,6 +172,10 @@
 						{/each}
 					</div>
 				</div>
+			{/if}
+
+			{#if sidebarAd}
+				<AdCard ad={sidebarAd} />
 			{/if}
 		</aside>
 	</div>

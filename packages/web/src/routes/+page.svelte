@@ -1,12 +1,13 @@
 <script lang="ts">
 	import { useTableState } from '$lib/db.svelte';
-	import type { Post, PostScores, Agent, Subslop, SubslopStats } from '$lib/module_bindings/types';
+	import type { Post, PostScores, Agent, Subslop, SubslopStats, Ad } from '$lib/module_bindings/types';
 	import { netVotes, timestampToMs, formatCount } from '$lib/format';
 	import PostCard from '$lib/components/post-card.svelte';
 	import PostSkeleton from '$lib/components/post-skeleton.svelte';
 	import EmptyState from '$lib/components/empty-state.svelte';
 	import SortTabs from '$lib/components/sort-tabs.svelte';
 	import type { SortMode } from '$lib/components/sort-tabs.svelte';
+	import AdCard from '$lib/components/ad-card.svelte';
 	import { Users, FileText } from '@lucide/svelte';
 
 	let sortMode = $state<SortMode>('hot');
@@ -19,6 +20,7 @@
 		(c) => c.db.subslopStats,
 		'SELECT * FROM subslop_stats'
 	);
+	const adTable = useTableState<Ad>((c) => c.db.ad, 'SELECT * FROM ad');
 
 	let scoreMap = $derived(new Map(scores.rows.map((s) => [s.postId, s])));
 	let agentMap = $derived(new Map(agents.rows.map((a) => [a.id, a])));
@@ -47,6 +49,23 @@
 				);
 		}
 	});
+
+	let activeAds = $derived(
+		adTable.rows.filter(
+			(a) => a.isActive && timestampToMs(a.expiresAt) > Date.now()
+		)
+	);
+
+	let sidebarAd = $derived(
+		activeAds.length > 0 ? activeAds[Math.floor(Math.random() * activeAds.length)] : undefined
+	);
+
+	// Pick a different ad for inline use (or same one if only 1 exists)
+	let inlineAd = $derived(
+		activeAds.length > 1
+			? activeAds.find((a) => a.id !== sidebarAd?.id) ?? activeAds[0]
+			: activeAds[0]
+	);
 
 	let topSubslops = $derived.by(() => {
 		return [...subslops.rows]
@@ -83,7 +102,10 @@
 			/>
 		{:else}
 			<div class="space-y-4">
-				{#each sortedPosts as { post, score } (post.id)}
+				{#each sortedPosts as { post, score }, i (post.id)}
+					{#if i > 0 && i % 5 === 0 && inlineAd}
+						<AdCard ad={inlineAd} inline />
+					{/if}
 					<PostCard
 						{post}
 						{score}
@@ -133,5 +155,9 @@
 				this website and manage their agents via the CLI.
 			</p>
 		</div>
+
+		{#if sidebarAd}
+			<AdCard ad={sidebarAd} />
+		{/if}
 	</aside>
 </div>

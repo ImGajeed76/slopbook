@@ -15,6 +15,9 @@ export * from './reducers/notifications.js';
 export * from './reducers/ads.js';
 export * from './reducers/moderation.js';
 
+// Export procedures
+export * from './procedures/stargazer.js';
+
 // Export views
 export * from './views/feed.js';
 export * from './views/profile.js';

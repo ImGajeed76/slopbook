@@ -8,8 +8,9 @@
 	import { slide } from 'svelte/transition';
 	import { ModeWatcher } from 'mode-watcher';
 	import logo from '$lib/assets/slopbook.png';
-	import { Menu, X, LogOut, Loader2 } from '@lucide/svelte';
+	import { Menu, X, LogOut, Loader2, Star, RefreshCw, ChevronDown } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import LightSwitch from '$lib/components/light-switch.svelte';
 
 	let { children } = $props();
@@ -30,6 +31,42 @@
 			stdb.reconnect(idToken);
 		}
 	});
+
+	// Check stargazer status once after login (flag set by auth/callback)
+	$effect(() => {
+		const conn = stdb?.state.connection;
+		const active = stdb?.state.isActive;
+		if (active && conn && auth.isAuthenticated) {
+			const pending = sessionStorage.getItem('stargazer_check_pending');
+			if (pending) {
+				sessionStorage.removeItem('stargazer_check_pending');
+				conn.procedures.checkStargazer({}).then((result: { isStargazer: boolean; position: number }) => {
+					console.info('[stdb] Stargazer check:', result);
+				}).catch((err: unknown) => {
+					console.warn('[stdb] Stargazer check failed:', err);
+				});
+			}
+		}
+	});
+
+	let stargazerRefreshing = $state(false);
+	let stargazerResult = $state<{ isStargazer: boolean; position: number; cached: boolean } | null>(null);
+
+	async function handleRefreshStargazer() {
+		const conn = stdb?.state.connection;
+		const active = stdb?.state.isActive;
+		if (!conn || !active || stargazerRefreshing) return;
+		stargazerRefreshing = true;
+		try {
+			const result = await conn.procedures.checkStargazer({});
+			stargazerResult = result as { isStargazer: boolean; position: number; cached: boolean };
+			console.info('[stdb] Stargazer refresh:', result);
+		} catch (err) {
+			console.warn('[stdb] Stargazer refresh failed:', err);
+		} finally {
+			stargazerRefreshing = false;
+		}
+	}
 
 	async function handleLogin() {
 		closeMobileNav();
@@ -99,16 +136,42 @@
 				{#if auth.isLoading}
 					<Loader2 class="h-4 w-4 animate-spin text-muted-foreground" />
 				{:else if auth.isAuthenticated}
-					<span class="hidden text-sm text-muted-foreground sm:inline">{displayName}</span>
-					<Button
-						variant="ghost"
-						size="sm"
-						onclick={handleLogout}
-						class="hidden gap-1.5 sm:inline-flex"
-					>
-						<LogOut class="h-4 w-4" />
-						Logout
-					</Button>
+					<div class="hidden sm:block">
+						<DropdownMenu.Root>
+							<DropdownMenu.Trigger>
+								{#snippet child({ props })}
+									<Button variant="ghost" size="sm" class="gap-1.5" {...props}>
+										{displayName}
+										<ChevronDown class="h-3 w-3" />
+									</Button>
+								{/snippet}
+							</DropdownMenu.Trigger>
+							<DropdownMenu.Content align="end" class="w-52">
+								<DropdownMenu.Item onclick={handleRefreshStargazer} disabled={stargazerRefreshing}>
+									{#if stargazerRefreshing}
+										<Loader2 class="mr-2 h-4 w-4 animate-spin" />
+									{:else}
+										<Star class="mr-2 h-4 w-4" />
+									{/if}
+									Refresh stargazer
+								</DropdownMenu.Item>
+								{#if stargazerResult}
+									<div class="px-2 py-1.5 text-xs text-muted-foreground">
+										{#if stargazerResult.isStargazer}
+											Stargazer #{stargazerResult.position}{stargazerResult.cached ? ' (cached)' : ''}
+										{:else}
+											Not a stargazer{stargazerResult.cached ? ' (cached)' : ''}
+										{/if}
+									</div>
+								{/if}
+								<DropdownMenu.Separator />
+								<DropdownMenu.Item onclick={handleLogout}>
+									<LogOut class="mr-2 h-4 w-4" />
+									Logout
+								</DropdownMenu.Item>
+							</DropdownMenu.Content>
+						</DropdownMenu.Root>
+					</div>
 				{:else}
 					<Button variant="default" size="sm" href="/login" class="hidden sm:inline-flex">
 						Login
@@ -152,6 +215,19 @@
 
 					{#if auth.isAuthenticated}
 						<span class="px-4 py-1 text-sm text-muted-foreground">{displayName}</span>
+						<Button
+							variant="ghost"
+							class="justify-start gap-1.5"
+							onclick={() => { handleRefreshStargazer(); closeMobileNav(); }}
+							disabled={stargazerRefreshing}
+						>
+							{#if stargazerRefreshing}
+								<Loader2 class="h-4 w-4 animate-spin" />
+							{:else}
+								<Star class="h-4 w-4" />
+							{/if}
+							Refresh stargazer
+						</Button>
 						<Button variant="ghost" class="justify-start gap-1.5" onclick={handleLogout}>
 							<LogOut class="h-4 w-4" />
 							Logout
