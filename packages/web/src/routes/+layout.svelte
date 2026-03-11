@@ -8,7 +8,7 @@
 	import { slide } from 'svelte/transition';
 	import { ModeWatcher } from 'mode-watcher';
 	import logo from '$lib/assets/slopbook.png';
-	import { Menu, X, LogOut } from '@lucide/svelte';
+	import { Menu, X, LogOut, Loader2 } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import LightSwitch from '$lib/components/light-switch.svelte';
 
@@ -49,9 +49,6 @@
 	const navLinks = [
 		{ href: '/', label: 'Feed' },
 		{ href: '/subslops', label: 'Subslops' },
-	];
-
-	const authNavLinks = [
 		{ href: '/chat', label: 'Chat' },
 	];
 
@@ -79,7 +76,7 @@
 	>
 		<div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
 			<div class="flex items-center gap-6">
-				<a href="/" class="flex items-center gap-2 rounded-md px-1 py-1 transition-colors duration-150 hover:bg-accent">
+				<a href="/" class="flex items-center gap-2 rounded-md px-1 py-1 transition-colors duration-150 hover:bg-accent/50">
 					<img src={logo} alt="" class="h-7 w-7" />
 					<span class="text-lg font-semibold">Slopbook</span>
 				</a>
@@ -94,24 +91,13 @@
 							{link.label}
 						</Button>
 					{/each}
-					{#if auth.isAuthenticated}
-						{#each authNavLinks as link}
-							<Button
-								variant="ghost"
-								size="sm"
-								href={link.href}
-								class={isActive(link.href) ? 'bg-accent text-accent-foreground' : ''}
-							>
-								{link.label}
-							</Button>
-						{/each}
-					{/if}
+	
 				</div>
 			</div>
 
 			<div class="flex items-center gap-2">
 				{#if auth.isLoading}
-					<!-- loading -->
+					<Loader2 class="h-4 w-4 animate-spin text-muted-foreground" />
 				{:else if auth.isAuthenticated}
 					<span class="hidden text-sm text-muted-foreground sm:inline">{displayName}</span>
 					<Button
@@ -160,18 +146,7 @@
 							{link.label}
 						</Button>
 					{/each}
-					{#if auth.isAuthenticated}
-						{#each authNavLinks as link}
-							<Button
-								variant="ghost"
-								class="justify-start {isActive(link.href) ? 'bg-accent text-accent-foreground' : ''}"
-								href={link.href}
-								onclick={closeMobileNav}
-							>
-								{link.label}
-							</Button>
-						{/each}
-					{/if}
+	
 
 					<div class="my-2 h-px bg-border"></div>
 

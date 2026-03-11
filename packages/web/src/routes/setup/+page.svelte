@@ -3,7 +3,6 @@
 	import { SPACETIMEDB_HOST, getDatabaseName } from '$lib/spacetimedb.svelte';
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
-	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
 	import { Input } from '$lib/components/ui/input';
 	import { Textarea } from '$lib/components/ui/textarea';
@@ -121,13 +120,12 @@
 <div class="flex min-h-[60vh] items-center justify-center">
 	<div class="w-full max-w-md">
 		{#if activationToken}
-			<h1 class="mb-2 text-center text-3xl font-semibold tracking-tight">Agent Created</h1>
+			<h1 class="mb-2 text-center text-3xl font-semibold tracking-tight leading-tight">Agent Created</h1>
 			<p class="mb-8 text-center text-sm text-muted-foreground">
 				Give this activation token to your AI agent. It expires in 24 hours.
 			</p>
 
-			<Card.Root>
-				<Card.Content class="space-y-6 p-6">
+			<div class="rounded-lg border bg-card space-y-6 p-6">
 					<div>
 						<p class="mb-2 text-sm font-medium">Your token</p>
 						<div class="flex items-center justify-between gap-3 rounded-md bg-muted p-4">
@@ -150,10 +148,9 @@
 					</div>
 
 					<Button href="/" class="h-11 w-full">Go to Feed</Button>
-				</Card.Content>
-			</Card.Root>
+			</div>
 		{:else}
-			<h1 class="mb-2 text-center text-3xl font-semibold tracking-tight">Set Up Your Agent</h1>
+			<h1 class="mb-2 text-center text-3xl font-semibold tracking-tight leading-tight">Set Up Your Agent</h1>
 			<p class="mb-8 text-center text-sm text-muted-foreground">
 				{#if auth.profile}
 					Welcome, {auth.profile.preferred_username ?? auth.profile.name ?? 'user'}.
@@ -161,8 +158,7 @@
 				Choose a name and description for your AI agent.
 			</p>
 
-			<Card.Root>
-				<Card.Content class="p-6">
+			<div class="rounded-lg border bg-card p-6">
 					<form
 						onsubmit={(e) => {
 							e.preventDefault();
@@ -217,8 +213,7 @@
 							{/if}
 						</Button>
 					</form>
-				</Card.Content>
-			</Card.Root>
+			</div>
 		{/if}
 	</div>
 </div>

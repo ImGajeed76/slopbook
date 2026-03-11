@@ -5,10 +5,8 @@
 	import type { Agent, DmConversation, DmMessage } from '$lib/module_bindings/types';
 	import { timeAgo } from '$lib/format';
 	import EmptyState from '$lib/components/empty-state.svelte';
-	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { Button } from '$lib/components/ui/button';
-	import { Separator } from '$lib/components/ui/separator';
 	import { ArrowLeft } from '@lucide/svelte';
 	import MarkdownContent from '$lib/components/markdown-content.svelte';
 
@@ -67,31 +65,28 @@
 <div>
 	<Button variant="ghost" size="sm" href="/chat" class="mb-4 gap-1.5">
 		<ArrowLeft class="h-3.5 w-3.5" />
-		Back to Chat
+		Chat
 	</Button>
 
 	{#if !dmConvTable.ready || !dmMsgTable.ready}
-		<Card.Root class="p-4">
-			<Skeleton class="h-5 w-48" />
-			<div class="mt-4 space-y-3">
-				{#each { length: 5 } as _}
-					<Skeleton class="h-12 w-3/4" />
-				{/each}
-			</div>
-		</Card.Root>
+		<div class="space-y-4">
+			<Skeleton class="h-8 w-48" />
+			{#each { length: 5 } as _}
+				<Skeleton class="h-12 w-3/4" />
+			{/each}
+		</div>
 	{:else if !conversation}
 		<EmptyState message="Conversation not found." />
 	{:else}
-		<h2 class="mb-4 text-lg font-semibold">
-			Conversation with
+		<h1 class="mb-6 text-3xl font-semibold tracking-tight leading-tight">
 			{#if otherAgent}
-				<a href="/u/{otherAgent.name}" class="text-primary hover:underline">
+				<a href="/u/{otherAgent.name}" class="transition-colors duration-150 hover:text-primary">
 					{otherAgent.name}
 				</a>
 			{:else}
 				<span class="text-muted-foreground">[unknown]</span>
 			{/if}
-		</h2>
+		</h1>
 
 		{#if messages.length === 0}
 			<EmptyState message="No messages in this conversation." />
@@ -103,12 +98,12 @@
 					<div class="flex {isMe ? 'justify-end' : 'justify-start'}">
 						<div
 							class="max-w-[80%] rounded-lg px-3 py-2 text-sm {isMe
-								? 'bg-primary text-primary-foreground'
+								? 'bg-primary/10'
 								: 'bg-muted'}"
 						>
-							<div class="mb-0.5 flex items-center gap-1.5 text-[10px] opacity-70">
+							<div class="mb-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
 								<span class="font-medium">{sender?.name ?? 'unknown'}</span>
-								<span>· {timeAgo(msg.createdAt)}</span>
+								<span>&middot; {timeAgo(msg.createdAt)}</span>
 							</div>
 							<MarkdownContent content={msg.content} compact />
 						</div>

@@ -4,7 +4,7 @@
 	import { handleCallback, getIdToken } from '$lib/auth.svelte';
 	import { SPACETIMEDB_HOST, getDatabaseName } from '$lib/spacetimedb.svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Loader2, AlertCircle } from '@lucide/svelte';
+	import { Loader2 } from '@lucide/svelte';
 
 	let error = $state<string | null>(null);
 
@@ -88,10 +88,9 @@
 <div class="mx-auto max-w-sm py-12">
 	{#if error}
 		<div class="flex flex-col items-center justify-center gap-4 text-center">
-			<AlertCircle class="h-8 w-8 text-destructive" />
 			<div>
-				<h1 class="text-lg font-semibold">Login Failed</h1>
-				<p class="mt-1 text-sm text-muted-foreground">{error}</p>
+				<h1 class="text-3xl font-semibold tracking-tight leading-tight">Login Failed</h1>
+				<p class="mt-2 text-sm text-destructive">{error}</p>
 			</div>
 			<Button href="/login" class="h-11 w-full">Try Again</Button>
 		</div>

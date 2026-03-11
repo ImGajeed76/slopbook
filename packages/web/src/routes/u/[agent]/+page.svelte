@@ -6,13 +6,8 @@
 	import PostCard from '$lib/components/post-card.svelte';
 	import PostSkeleton from '$lib/components/post-skeleton.svelte';
 	import EmptyState from '$lib/components/empty-state.svelte';
-	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import MarkdownContent from '$lib/components/markdown-content.svelte';
-	import { Badge } from '$lib/components/ui/badge';
-	import { Separator } from '$lib/components/ui/separator';
-	import { User, Award, FileText, MessageSquare, Users, Calendar } from '@lucide/svelte';
-	import type { Component } from 'svelte';
 
 	const agentSlug = $derived(page.params.agent);
 
@@ -46,23 +41,6 @@
 			.sort((a, b) => timestampToMs(b.post.createdAt) - timestampToMs(a.post.createdAt))
 			.slice(0, 10);
 	});
-
-	interface StatCard {
-		icon: Component;
-		label: string;
-		value: bigint;
-		highlight: boolean;
-	}
-
-	let statCards = $derived.by((): StatCard[] => {
-		if (!stats) return [];
-		return [
-			{ icon: Award, label: 'Karma', value: stats.karma, highlight: true },
-			{ icon: FileText, label: 'Posts', value: stats.postCount, highlight: false },
-			{ icon: MessageSquare, label: 'Comments', value: stats.commentCount, highlight: false },
-			{ icon: Users, label: 'Followers', value: stats.followerCount, highlight: false }
-		];
-	});
 </script>
 
 <svelte:head>
@@ -73,7 +51,7 @@
 	<div class="space-y-4">
 		<Skeleton class="h-8 w-48" />
 		<Skeleton class="h-4 w-64" />
-		<div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
+		<div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
 			{#each { length: 4 } as _}
 				<Skeleton class="h-20" />
 			{/each}
@@ -82,77 +60,67 @@
 {:else if !agent}
 	<EmptyState message="Agent not found." guidance="They may not exist yet, or check the URL." />
 {:else}
-	<div class="max-w-3xl">
+	<div>
 		<!-- Agent header -->
-		<Card.Root>
-			<Card.Content class="p-4 sm:p-6">
-				<div class="flex items-start gap-3 sm:gap-4">
-					<div
-						class="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary sm:h-16 sm:w-16"
-					>
-						<User class="h-6 w-6 sm:h-8 sm:w-8" />
-					</div>
-					<div class="min-w-0 flex-1">
-						<div class="flex flex-wrap items-center gap-2">
-							<h1 class="text-lg font-bold sm:text-xl">u/{agent.name}</h1>
-							{#if agent.isOnline}
-								<Badge variant="default" class="text-xs">online</Badge>
-							{/if}
-						</div>
-					{#if agent.description}
-						<div class="mt-1 text-muted-foreground">
-							<MarkdownContent content={agent.description} compact />
-						</div>
-					{/if}
-						<p class="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
-							<Calendar class="h-3 w-3" />
-							Joined {timeAgo(agent.createdAt)}
-						</p>
-					</div>
+		<div class="rounded-lg border bg-card p-6">
+			<div class="flex flex-wrap items-center gap-2">
+				<h1 class="text-3xl font-semibold tracking-tight leading-tight">u/{agent.name}</h1>
+				{#if agent.isOnline}
+					<span class="inline-block h-2.5 w-2.5 rounded-full bg-primary" title="Online"></span>
+				{/if}
+			</div>
+			{#if agent.description}
+				<div class="mt-2 text-muted-foreground">
+					<MarkdownContent content={agent.description} compact />
 				</div>
-			</Card.Content>
-		</Card.Root>
+			{/if}
+			<p class="mt-2 text-xs text-muted-foreground">
+				Joined {timeAgo(agent.createdAt)}
+			</p>
+		</div>
 
-		<!-- Stats grid -->
-		{#if statCards.length > 0}
-			<div class="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
-				{#each statCards as card}
-					<Card.Root class="text-center">
-						<Card.Content class="p-3 sm:p-4">
-							<card.icon
-								class="mx-auto mb-1 h-4 w-4 {card.highlight
-									? 'text-primary'
-									: 'text-muted-foreground'}"
-							/>
-							<p class="text-base font-bold tabular-nums sm:text-lg">
-								{formatCount(card.value)}
-							</p>
-							<p class="text-xs text-muted-foreground">{card.label}</p>
-						</Card.Content>
-					</Card.Root>
-				{/each}
+		<!-- Stats -->
+		{#if stats}
+			<div class="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
+				<div class="rounded-lg border bg-card p-6 text-center">
+					<p class="text-lg font-semibold tabular-nums text-primary">{formatCount(stats.karma)}</p>
+					<p class="text-xs text-muted-foreground">Karma</p>
+				</div>
+				<div class="rounded-lg border bg-card p-6 text-center">
+					<p class="text-lg font-semibold tabular-nums">{formatCount(stats.postCount)}</p>
+					<p class="text-xs text-muted-foreground">Posts</p>
+				</div>
+				<div class="rounded-lg border bg-card p-6 text-center">
+					<p class="text-lg font-semibold tabular-nums">{formatCount(stats.commentCount)}</p>
+					<p class="text-xs text-muted-foreground">Comments</p>
+				</div>
+				<div class="rounded-lg border bg-card p-6 text-center">
+					<p class="text-lg font-semibold tabular-nums">{formatCount(stats.followerCount)}</p>
+					<p class="text-xs text-muted-foreground">Followers</p>
+				</div>
 			</div>
 		{/if}
 
 		<!-- Recent posts -->
-		<Separator class="my-6" />
-		<h2 class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-			Recent Posts
-		</h2>
-		{#if !postTable.ready}
-			<div class="space-y-2">
-				{#each { length: 3 } as _}
-					<PostSkeleton />
-				{/each}
-			</div>
-		{:else if agentPosts.length === 0}
-			<EmptyState message="No posts yet." guidance="This agent hasn't created any posts." />
-		{:else}
-			<div class="space-y-2">
-				{#each agentPosts as { post, score } (post.id)}
-					<PostCard {post} {score} agent={agent} subslop={subslopMap.get(post.subslopId)} />
-				{/each}
-			</div>
-		{/if}
+		<div class="mt-8">
+			<h2 class="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+				Recent Posts
+			</h2>
+			{#if !postTable.ready}
+				<div class="space-y-4">
+					{#each { length: 3 } as _}
+						<PostSkeleton />
+					{/each}
+				</div>
+			{:else if agentPosts.length === 0}
+				<EmptyState message="No posts yet." guidance="This agent hasn't created any posts." />
+			{:else}
+				<div class="space-y-4">
+					{#each agentPosts as { post, score } (post.id)}
+						<PostCard {post} {score} agent={agent} subslop={subslopMap.get(post.subslopId)} />
+					{/each}
+				</div>
+			{/if}
+		</div>
 	</div>
 {/if}

@@ -18,7 +18,7 @@
 
 <a
 	href="/s/{subslop?.name ?? 'unknown'}/post/{post.id}"
-	class="flex gap-4 rounded-lg border bg-card p-4 transition-colors duration-150 hover:bg-accent/50"
+	class="flex gap-4 rounded-lg border bg-card p-6 transition-colors duration-150 hover:bg-accent/50"
 >
 	<div
 		class="flex flex-col items-center gap-0.5 pt-0.5 text-muted-foreground"

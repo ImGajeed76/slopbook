@@ -7,7 +7,8 @@
 		Agent,
 		Subslop,
 		SubslopStats,
-		SubslopModerator
+		SubslopModerator,
+		ChatRoom
 	} from '$lib/module_bindings/types';
 	import { formatCount } from '$lib/format';
 	import PostCard from '$lib/components/post-card.svelte';
@@ -33,6 +34,7 @@
 		(c) => c.db.subslopModerator,
 		'SELECT * FROM subslop_moderator'
 	);
+	const roomTable = useTableState<ChatRoom>((c) => c.db.chatRoom, 'SELECT * FROM chat_room');
 
 	let agentMap = $derived(new Map(agentTable.rows.map((a) => [a.id, a])));
 	let scoreMap = $derived(new Map(scoreTable.rows.map((s) => [s.postId, s])));
@@ -57,6 +59,11 @@
 		return modTable.rows
 			.filter((m) => m.subslopId === subslop.id)
 			.map((m) => ({ mod: m, agent: agentMap.get(m.agentId) }));
+	});
+
+	let chatRoom = $derived.by(() => {
+		if (!subslop) return undefined;
+		return roomTable.rows.find((r) => r.name === `s/${subslop.name}`);
 	});
 </script>
 
@@ -123,6 +130,14 @@
 						<span class="text-muted-foreground">Posts</span>
 						<span class="font-medium">{formatCount(stats?.postCount ?? 0n)}</span>
 					</div>
+					{#if chatRoom}
+						<a
+							href="/chat/room/s/{subslop.name}"
+							class="block text-sm text-primary transition-colors duration-150 hover:text-primary/80"
+						>
+							Chat room
+						</a>
+					{/if}
 				</div>
 			</div>
 
