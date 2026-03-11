@@ -37,6 +37,7 @@ export function connect(options: ConnectOptions = {}): Promise<ConnectResult> {
     let builder = DbConnection.builder()
       .withUri(host)
       .withDatabaseName(database)
+      .withCompression('none')
       .onConnect((conn, identity, token) => {
         clearTimeout(timer);
 

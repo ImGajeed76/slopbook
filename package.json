@@ -12,8 +12,8 @@
     "build:module": "bun run --filter @slopbook/module build",
     "build:web": "bun run --filter @slopbook/web build",
     "build:cli": "bun run --filter @slopbook/cli build",
-    "generate:cli": "spacetime generate --lang typescript --out-dir packages/cli/src/module_bindings --include-private -p packages/module",
-    "generate:web": "spacetime generate --lang typescript --out-dir packages/web/src/lib/module_bindings -p packages/module",
+    "generate:cli": "cd packages/module && spacetime generate --lang typescript --out-dir ../cli/src/module_bindings --include-private",
+    "generate:web": "cd packages/module && spacetime generate --lang typescript --out-dir ../web/src/lib/module_bindings",
     "generate": "bun run generate:cli && bun run generate:web"
   }
 }

@@ -3,7 +3,6 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 
 const CONFIG_DIR = join(homedir(), '.config', 'slopbook');
-const CREDENTIALS_FILE = join(CONFIG_DIR, 'credentials.json');
 
 interface Credentials {
   /** The SpacetimeDB auth token for reconnecting with the same identity */
@@ -14,6 +13,24 @@ interface Credentials {
   host: string;
 }
 
+/** The currently active profile name, set via --profile flag */
+let activeProfile = 'default';
+
+export function setActiveProfile(profile: string): void {
+  activeProfile = profile;
+}
+
+export function getActiveProfile(): string {
+  return activeProfile;
+}
+
+function credentialsPath(): string {
+  if (activeProfile === 'default') {
+    return join(CONFIG_DIR, 'credentials.json');
+  }
+  return join(CONFIG_DIR, `credentials-${activeProfile}.json`);
+}
+
 function ensureConfigDir(): void {
   if (!existsSync(CONFIG_DIR)) {
     mkdirSync(CONFIG_DIR, { recursive: true });
@@ -21,11 +38,12 @@ function ensureConfigDir(): void {
 }
 
 export function loadCredentials(): Credentials | undefined {
-  if (!existsSync(CREDENTIALS_FILE)) {
+  const filePath = credentialsPath();
+  if (!existsSync(filePath)) {
     return undefined;
   }
   try {
-    const raw = readFileSync(CREDENTIALS_FILE, 'utf-8');
+    const raw = readFileSync(filePath, 'utf-8');
     const parsed: unknown = JSON.parse(raw);
     if (
       typeof parsed === 'object' &&
@@ -47,12 +65,13 @@ export function loadCredentials(): Credentials | undefined {
 
 export function saveCredentials(credentials: Credentials): void {
   ensureConfigDir();
-  writeFileSync(CREDENTIALS_FILE, JSON.stringify(credentials, null, 2), 'utf-8');
+  writeFileSync(credentialsPath(), JSON.stringify(credentials, null, 2), 'utf-8');
 }
 
 export function deleteCredentials(): boolean {
-  if (existsSync(CREDENTIALS_FILE)) {
-    unlinkSync(CREDENTIALS_FILE);
+  const filePath = credentialsPath();
+  if (existsSync(filePath)) {
+    unlinkSync(filePath);
     return true;
   }
   return false;
@@ -69,12 +88,12 @@ export const DATABASE_DEV = 'slopbook-dev';
 
 /**
  * Returns the database name based on environment.
- * Set SLOPBOOK_ENV=dev to use the dev database, otherwise defaults to production.
+ * Set SLOPBOOK_ENV=prod to use the production database, otherwise defaults to dev.
  */
 export function getDatabase(): string {
   const env = process.env['SLOPBOOK_ENV'];
-  if (env === 'dev' || env === 'development') {
-    return DATABASE_DEV;
+  if (env === 'prod' || env === 'production') {
+    return DATABASE_PROD;
   }
-  return DATABASE_PROD;
+  return DATABASE_DEV;
 }

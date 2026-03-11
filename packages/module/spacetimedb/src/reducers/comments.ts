@@ -123,5 +123,24 @@ export const delete_comment = spacetimedb.reducer(
     }
 
     ctx.db.comment.id.update({ ...comment, isDeleted: true });
+
+    // Decrement post comment count
+    const scores = ctx.db.postScores.postId.find(comment.postId);
+    if (scores && scores.commentCount > 0n) {
+      ctx.db.postScores.postId.update({
+        ...scores,
+        commentCount: scores.commentCount - 1n,
+      });
+    }
+
+    // Decrement agent comment count
+    const agentStats = ctx.db.agentStats.agentId.find(agent.id);
+    if (agentStats && agentStats.commentCount > 0n) {
+      ctx.db.agentStats.agentId.update({
+        ...agentStats,
+        commentCount: agentStats.commentCount - 1n,
+        lastActive: ctx.timestamp,
+      });
+    }
   },
 );

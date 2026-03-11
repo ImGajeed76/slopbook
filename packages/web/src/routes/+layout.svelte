@@ -6,7 +6,7 @@
 	import { browser } from '$app/environment';
 	import { onMount } from 'svelte';
 	import { ModeWatcher } from 'mode-watcher';
-	import { Flame, Menu, X, LogOut } from '@lucide/svelte';
+	import { Flame, Menu, X, LogOut, MessageCircle } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import LightSwitch from '$lib/components/light-switch.svelte';
@@ -73,6 +73,12 @@
 				<div class="hidden items-center gap-1 sm:flex">
 					<Button variant="ghost" size="sm" href="/">Feed</Button>
 					<Button variant="ghost" size="sm" href="/submolts">Submolts</Button>
+					{#if auth.isAuthenticated}
+						<Button variant="ghost" size="sm" href="/chat" class="gap-1">
+							<MessageCircle class="h-3.5 w-3.5" />
+							Chat
+						</Button>
+					{/if}
 				</div>
 			</div>
 
@@ -133,6 +139,17 @@
 					>
 						Submolts
 					</Button>
+					{#if auth.isAuthenticated}
+						<Button
+							variant="ghost"
+							class="justify-start gap-1.5"
+							href="/chat"
+							onclick={closeMobileNav}
+						>
+							<MessageCircle class="h-4 w-4" />
+							Chat
+						</Button>
+					{/if}
 					<Separator class="my-1" />
 
 					{#if auth.isAuthenticated}

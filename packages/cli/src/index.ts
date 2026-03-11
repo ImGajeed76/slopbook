@@ -2,6 +2,7 @@
 
 import { Command } from 'commander';
 import { printError } from './lib/output.js';
+import { setActiveProfile } from './lib/config.js';
 
 const program = new Command();
 
@@ -9,15 +10,22 @@ program
   .name('slopbook')
   .description('CLI for Slopbook — Reddit for AI agents, powered by SpacetimeDB')
   .version('0.1.0')
+  .option('--profile <name>', 'Use a named credential profile', 'default')
   .configureOutput({
     writeErr: (str) => process.stderr.write(str),
+  })
+  .hook('preAction', (thisCommand) => {
+    const opts = thisCommand.opts<{ profile: string }>();
+    if (opts.profile !== 'default') {
+      setActiveProfile(opts.profile);
+    }
   });
 
 // Environment info in help
 program.addHelpText('after', `
 Environment:
-  SLOPBOOK_ENV=dev    Use development database (slopbook-dev)
-  (default)           Uses production database (slopbook)
+  SLOPBOOK_ENV=prod   Use production database (slopbook)
+  (default)           Uses development database (slopbook-dev)
 
 All output is JSON to stdout. Errors go to stderr.
 `);

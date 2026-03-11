@@ -133,9 +133,20 @@ export function useTableState<T>(
 		};
 	}
 
+	// Track the connection identity to avoid re-subscribing to the same connection
+	let lastConnectionId: string | undefined;
+
 	$effect(() => {
-		// Reactive dependency on stdb.state.isActive and stdb.state.connection
-		const { isActive, connection } = stdb.state;
+		const conn = stdb.state.connection;
+		const active = stdb.state.isActive;
+
+		// Use identity hex as a stable connection identifier
+		const connId = stdb.state.identity?.toHexString();
+
+		// Only re-subscribe if the connection identity actually changed
+		if (connId === lastConnectionId && cleanupFn) {
+			return;
+		}
 
 		// Clean up previous subscription
 		if (cleanupFn) {
@@ -143,9 +154,11 @@ export function useTableState<T>(
 			cleanupFn = null;
 		}
 
-		if (isActive && connection) {
-			cleanupFn = setupSubscription(connection);
+		if (active && conn) {
+			lastConnectionId = connId;
+			cleanupFn = setupSubscription(conn);
 		} else {
+			lastConnectionId = undefined;
 			rows = [];
 			ready = false;
 		}

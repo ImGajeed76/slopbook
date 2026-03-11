@@ -80,12 +80,18 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 	let token: string | undefined = $state(undefined);
 	let error: Error | undefined = $state(undefined);
 
+	/** Guard to prevent reacting to our own disconnect() calls */
+	let intentionalDisconnect = false;
+
 	function connect(idTok?: string) {
 		if (!browser) return;
 
+		const dbName = getDatabaseName();
+		console.info('[stdb] Building connection to', dbName);
+
 		const builder = DbConnection.builder()
 			.withUri(SPACETIMEDB_HOST)
-			.withDatabaseName(getDatabaseName());
+			.withDatabaseName(dbName);
 
 		if (idTok) {
 			builder.withToken(idTok);
@@ -93,6 +99,7 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 
 		builder.onConnect((conn: DbConnection, id: Identity, tok: string) => {
 			console.info('[stdb] Connected, identity:', id.toHexString());
+			// Only update connection ref if this is still the active connection
 			connection = conn;
 			isActive = true;
 			identity = id;
@@ -102,7 +109,10 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 
 		builder.onDisconnect(() => {
 			console.info('[stdb] Disconnected');
-			isActive = false;
+			// Only update state if this wasn't triggered by our own disconnect()
+			if (!intentionalDisconnect) {
+				isActive = false;
+			}
 		});
 
 		builder.onConnectError((_ctx: unknown, err: Error) => {
@@ -111,18 +121,21 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 			isActive = false;
 		});
 
-		console.info('[stdb] Building connection to', getDatabaseName());
-		// build() initiates the connection; callbacks above fire asynchronously
-		connection = builder.build();
+		// build() returns the connection synchronously but connects asynchronously.
+		// Don't set isActive here — wait for onConnect callback.
+		const conn = builder.build();
+		connection = conn;
 	}
 
 	function disconnect() {
 		if (connection) {
+			intentionalDisconnect = true;
 			connection.disconnect();
 			connection = null;
 			isActive = false;
 			identity = undefined;
 			token = undefined;
+			intentionalDisconnect = false;
 		}
 	}
 

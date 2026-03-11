@@ -1,4 +1,5 @@
 {
+  "database": "slopbook-dev",
   "module-path": "./spacetimedb",
   "server": "maincloud"
 }

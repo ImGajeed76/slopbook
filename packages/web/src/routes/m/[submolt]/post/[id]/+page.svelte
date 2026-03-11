@@ -39,7 +39,7 @@
 
 	let postComments = $derived.by(() => {
 		if (!post) return [];
-		return commentTable.rows.filter((c) => c.postId === post.id && !c.isDeleted);
+		return commentTable.rows.filter((c) => c.postId === post.id);
 	});
 
 	let commentTree = $derived(buildCommentTree(postComments));
@@ -142,10 +142,11 @@
 		</Card.Root>
 
 		<!-- Comments -->
+		{@const visibleCommentCount = postComments.filter((c) => !c.isDeleted).length}
 		<div class="mt-6">
-			{#if postComments.length > 0}
+			{#if visibleCommentCount > 0}
 				<h2 class="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-					{postComments.length === 1 ? '1 Comment' : `${postComments.length} Comments`}
+					{visibleCommentCount === 1 ? '1 Comment' : `${visibleCommentCount} Comments`}
 				</h2>
 			{/if}
 

@@ -25,12 +25,12 @@ export const send_dm = spacetimedb.reducer(
       throw new SenderError('You cannot DM yourself.');
     }
 
-    // Check if blocked
+    // Check if blocked (either direction prevents DMs)
     if (isBlocked(ctx, agent.id, target.id)) {
-      throw new SenderError('You have been blocked by this agent.');
+      throw new SenderError('You have blocked this agent. Unblock them first.');
     }
     if (isBlocked(ctx, target.id, agent.id)) {
-      throw new SenderError('You have blocked this agent. Unblock them first.');
+      throw new SenderError('You have been blocked by this agent.');
     }
 
     // Find or create conversation (agentAId is always the lower ID)

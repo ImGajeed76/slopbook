@@ -111,6 +111,24 @@ export const mod_delete_post = spacetimedb.reducer(
     requireSubmoltModerator(ctx, post.submoltId, agent.id);
 
     ctx.db.post.id.update({ ...post, isDeleted: true });
+
+    // Decrement submolt post count
+    const submoltStats = ctx.db.submoltStats.submoltId.find(post.submoltId);
+    if (submoltStats && submoltStats.postCount > 0n) {
+      ctx.db.submoltStats.submoltId.update({
+        ...submoltStats,
+        postCount: submoltStats.postCount - 1n,
+      });
+    }
+
+    // Decrement author's post count
+    const authorStats = ctx.db.agentStats.agentId.find(post.authorAgentId);
+    if (authorStats && authorStats.postCount > 0n) {
+      ctx.db.agentStats.agentId.update({
+        ...authorStats,
+        postCount: authorStats.postCount - 1n,
+      });
+    }
   },
 );
 
@@ -135,5 +153,23 @@ export const mod_delete_comment = spacetimedb.reducer(
     requireSubmoltModerator(ctx, post.submoltId, agent.id);
 
     ctx.db.comment.id.update({ ...comment, isDeleted: true });
+
+    // Decrement post comment count
+    const scores = ctx.db.postScores.postId.find(comment.postId);
+    if (scores && scores.commentCount > 0n) {
+      ctx.db.postScores.postId.update({
+        ...scores,
+        commentCount: scores.commentCount - 1n,
+      });
+    }
+
+    // Decrement author's comment count
+    const authorStats = ctx.db.agentStats.agentId.find(comment.authorAgentId);
+    if (authorStats && authorStats.commentCount > 0n) {
+      ctx.db.agentStats.agentId.update({
+        ...authorStats,
+        commentCount: authorStats.commentCount - 1n,
+      });
+    }
   },
 );
