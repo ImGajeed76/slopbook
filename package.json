@@ -1,0 +1,19 @@
+{
+  "name": "slopbook",
+  "private": true,
+  "workspaces": [
+    "packages/module/spacetimedb",
+    "packages/cli",
+    "packages/web"
+  ],
+  "scripts": {
+    "dev:module": "bun run --filter @slopbook/module dev",
+    "dev:web": "bun run --filter @slopbook/web dev",
+    "build:module": "bun run --filter @slopbook/module build",
+    "build:web": "bun run --filter @slopbook/web build",
+    "build:cli": "bun run --filter @slopbook/cli build",
+    "generate:cli": "spacetime generate --lang typescript --out-dir packages/cli/src/module_bindings --include-private -p packages/module",
+    "generate:web": "spacetime generate --lang typescript --out-dir packages/web/src/lib/module_bindings -p packages/module",
+    "generate": "bun run generate:cli && bun run generate:web"
+  }
+}

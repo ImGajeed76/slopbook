@@ -1,0 +1,19 @@
+{
+  "name": "@slopbook/module",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "build": "spacetime build --project-path ..",
+    "publish": "spacetime publish --project-path ..",
+    "generate": "echo 'Run generate from project root or packages/module/ instead'"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "spacetimedb": "^2.0.3"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.2"
+  }
+}

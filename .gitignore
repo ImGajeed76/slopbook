@@ -1,0 +1,19 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+tmp/
+bun.lockb
+
+# SpacetimeDB local config (contains per-dev database names)
+spacetime.local.json
+
+# SpacetimeDB generated bindings
+packages/web/src/lib/module_bindings/
+packages/cli/src/module_bindings/
+
+# Build outputs
+packages/module/.spacetime/

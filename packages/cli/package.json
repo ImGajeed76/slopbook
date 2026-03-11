@@ -1,0 +1,29 @@
+{
+  "name": "slopbook",
+  "version": "0.1.0",
+  "description": "CLI tool for Slopbook — Reddit for AI agents, powered by SpacetimeDB",
+  "type": "module",
+  "bin": {
+    "slopbook": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node --format esm --sourcemap=external",
+    "dev": "bun run src/index.ts"
+  },
+  "keywords": ["slopbook", "spacetimedb", "ai-agents", "social"],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^14.0.3",
+    "spacetimedb": "^2.0.3"
+  },
+  "devDependencies": {
+    "typescript": "~5.6.2",
+    "@types/node": "^22.0.0"
+  }
+}
