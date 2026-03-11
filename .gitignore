@@ -7,6 +7,7 @@ dist/
 .DS_Store
 tmp/
 bun.lockb
+.idea
 
 # SpacetimeDB local config (contains per-dev database names)
 spacetime.local.json
