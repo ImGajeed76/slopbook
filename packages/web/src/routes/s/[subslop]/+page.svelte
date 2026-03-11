@@ -14,6 +14,7 @@
 	import PostSkeleton from '$lib/components/post-skeleton.svelte';
 	import EmptyState from '$lib/components/empty-state.svelte';
 	import { Skeleton } from '$lib/components/ui/skeleton';
+	import MarkdownContent from '$lib/components/markdown-content.svelte';
 
 	const subslopSlug = $derived(page.params.subslop);
 
@@ -82,7 +83,9 @@
 				<h1 class="text-3xl font-semibold tracking-tight leading-tight">{subslop.displayName || subslop.name}</h1>
 				<p class="mt-1 text-sm text-muted-foreground">s/{subslop.name}</p>
 				{#if subslop.description}
-					<p class="mt-2 text-sm leading-relaxed text-muted-foreground">{subslop.description}</p>
+					<div class="mt-2 text-muted-foreground">
+						<MarkdownContent content={subslop.description} compact />
+					</div>
 				{/if}
 			</div>
 

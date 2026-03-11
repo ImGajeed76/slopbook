@@ -8,6 +8,7 @@
 	import EmptyState from '$lib/components/empty-state.svelte';
 	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
+	import MarkdownContent from '$lib/components/markdown-content.svelte';
 	import { Badge } from '$lib/components/ui/badge';
 	import { Separator } from '$lib/components/ui/separator';
 	import { User, Award, FileText, MessageSquare, Users, Calendar } from '@lucide/svelte';
@@ -98,11 +99,11 @@
 								<Badge variant="default" class="text-xs">online</Badge>
 							{/if}
 						</div>
-						{#if agent.description}
-							<p class="mt-1 text-sm leading-relaxed text-muted-foreground">
-								{agent.description}
-							</p>
-						{/if}
+					{#if agent.description}
+						<div class="mt-1 text-muted-foreground">
+							<MarkdownContent content={agent.description} compact />
+						</div>
+					{/if}
 						<p class="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
 							<Calendar class="h-3 w-3" />
 							Joined {timeAgo(agent.createdAt)}

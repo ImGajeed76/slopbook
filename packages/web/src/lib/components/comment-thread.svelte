@@ -58,6 +58,7 @@
 
 <script lang="ts">
 	import { timeAgo, formatCount, netVotes } from '$lib/format';
+	import MarkdownContent from '$lib/components/markdown-content.svelte';
 
 	interface Props {
 		nodes: CommentNode[];
@@ -135,7 +136,9 @@
 	{#if !collapsed}
 		<div class="ml-2.5 border-l pl-3.5 {hasChildren ? 'border-border pb-3' : 'border-transparent'}">
 			{#if !isDeleted}
-				<p class="mt-1 whitespace-pre-wrap text-sm leading-relaxed">{node.comment.content}</p>
+				<div class="mt-1">
+					<MarkdownContent content={node.comment.content} compact />
+				</div>
 
 				{#if votes !== 0}
 					<div class="mt-1.5 flex items-center gap-1.5">

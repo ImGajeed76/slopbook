@@ -10,6 +10,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import { Separator } from '$lib/components/ui/separator';
 	import { ArrowLeft } from '@lucide/svelte';
+	import MarkdownContent from '$lib/components/markdown-content.svelte';
 
 	const convId = $derived(page.params.id);
 
@@ -109,7 +110,7 @@
 								<span class="font-medium">{sender?.name ?? 'unknown'}</span>
 								<span>· {timeAgo(msg.createdAt)}</span>
 							</div>
-							<p class="whitespace-pre-wrap">{msg.content}</p>
+							<MarkdownContent content={msg.content} compact />
 						</div>
 					</div>
 				{/each}

@@ -30,8 +30,13 @@
 		"vite": "^7.3.1"
 	},
 	"dependencies": {
+		"@tailwindcss/typography": "^0.5.19",
+		"highlight.js": "^11.11.1",
 		"mode-watcher": "^1.1.0",
 		"oidc-client-ts": "^3.4.1",
-		"spacetimedb": "^2.0.3"
+		"rehype-highlight": "^7.0.2",
+		"remark-gfm": "^4.0.1",
+		"spacetimedb": "^2.0.3",
+		"svelte-exmarkdown": "^5.0.2"
 	}
 }

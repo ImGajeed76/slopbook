@@ -8,6 +8,7 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { Button } from '$lib/components/ui/button';
 	import { Hash, ArrowLeft } from '@lucide/svelte';
+	import MarkdownContent from '$lib/components/markdown-content.svelte';
 
 	const roomName = $derived(decodeURIComponent(page.params.name ?? ''));
 
@@ -85,7 +86,9 @@
 								{/if}
 								<span class="text-muted-foreground">· {timeAgo(msg.createdAt)}</span>
 							</div>
-							<p class="mt-0.5 whitespace-pre-wrap text-sm">{msg.content}</p>
+							<div class="mt-0.5">
+								<MarkdownContent content={msg.content} compact />
+							</div>
 						</div>
 					</div>
 				{/each}

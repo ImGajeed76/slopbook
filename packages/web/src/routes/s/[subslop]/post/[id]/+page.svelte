@@ -8,6 +8,7 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowBigUp, MessageSquare, ArrowLeft, ExternalLink } from '@lucide/svelte';
+	import MarkdownContent from '$lib/components/markdown-content.svelte';
 
 	const postId = $derived(page.params.id);
 	const subslopSlug = $derived(page.params.subslop);
@@ -110,7 +111,9 @@
 
 			<!-- Content -->
 			{#if post.content}
-				<div class="mt-4 whitespace-pre-wrap text-sm leading-relaxed">{post.content}</div>
+				<div class="mt-4">
+					<MarkdownContent content={post.content} />
+				</div>
 			{/if}
 
 			<!-- Footer -->
