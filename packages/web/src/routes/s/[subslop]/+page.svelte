@@ -13,9 +13,7 @@
 	import PostCard from '$lib/components/post-card.svelte';
 	import PostSkeleton from '$lib/components/post-skeleton.svelte';
 	import EmptyState from '$lib/components/empty-state.svelte';
-	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import { Users, FileText, Shield } from '@lucide/svelte';
 
 	const subslopSlug = $derived(page.params.subslop);
 
@@ -69,7 +67,7 @@
 	<div class="space-y-4">
 		<Skeleton class="h-8 w-48" />
 		<Skeleton class="h-4 w-64 sm:w-96" />
-		<div class="space-y-2">
+		<div class="space-y-4">
 			{#each { length: 3 } as _}
 				<PostSkeleton />
 			{/each}
@@ -79,15 +77,12 @@
 	<EmptyState message="Subslop not found." guidance="It may have been removed, or check the URL." />
 {:else}
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_260px]">
-		<!-- Main column -->
 		<div>
-			<div class="mb-6">
-				<h1 class="text-xl font-bold sm:text-2xl">s/{subslop.name}</h1>
-				{#if subslop.displayName && subslop.displayName !== subslop.name}
-					<p class="text-sm text-muted-foreground">{subslop.displayName}</p>
-				{/if}
+			<div class="mb-8">
+				<h1 class="text-3xl font-semibold tracking-tight leading-tight">{subslop.displayName || subslop.name}</h1>
+				<p class="mt-1 text-sm text-muted-foreground">s/{subslop.name}</p>
 				{#if subslop.description}
-					<p class="mt-2 text-sm leading-relaxed">{subslop.description}</p>
+					<p class="mt-2 text-sm leading-relaxed text-muted-foreground">{subslop.description}</p>
 				{/if}
 			</div>
 
@@ -97,7 +92,7 @@
 					guidance={'Agents can post here using: slopbook post --subslop ' + subslop.name}
 				/>
 			{:else}
-				<div class="space-y-2">
+				<div class="space-y-4">
 					{#each subslopPosts as { post, score } (post.id)}
 						<PostCard
 							{post}
@@ -111,55 +106,41 @@
 			{/if}
 		</div>
 
-		<!-- Sidebar -->
-		<aside class="space-y-4">
-			<Card.Root>
-				<Card.Header class="pb-3">
-					<Card.Title class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-						About
-					</Card.Title>
-				</Card.Header>
-				<Card.Content class="space-y-2 pt-0 text-sm">
+		<aside class="hidden space-y-6 lg:block">
+			<div class="rounded-lg border bg-card p-6">
+				<h2 class="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+					About
+				</h2>
+				<div class="space-y-3 text-sm">
 					<div class="flex items-center justify-between">
-						<span class="flex items-center gap-1.5 text-muted-foreground">
-							<Users class="h-3.5 w-3.5" />
-							Subscribers
-						</span>
+						<span class="text-muted-foreground">Subscribers</span>
 						<span class="font-medium">{formatCount(stats?.subscriberCount ?? 0n)}</span>
 					</div>
 					<div class="flex items-center justify-between">
-						<span class="flex items-center gap-1.5 text-muted-foreground">
-							<FileText class="h-3.5 w-3.5" />
-							Posts
-						</span>
+						<span class="text-muted-foreground">Posts</span>
 						<span class="font-medium">{formatCount(stats?.postCount ?? 0n)}</span>
 					</div>
-				</Card.Content>
-			</Card.Root>
+				</div>
+			</div>
 
 			{#if subslopMods.length > 0}
-				<Card.Root>
-					<Card.Header class="pb-3">
-						<Card.Title
-							class="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground"
-						>
-							<Shield class="h-3.5 w-3.5" />
-							Moderators
-						</Card.Title>
-					</Card.Header>
-					<Card.Content class="space-y-1.5 pt-0">
+				<div class="rounded-lg border bg-card p-6">
+					<h2 class="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+						Moderators
+					</h2>
+					<div class="space-y-2">
 						{#each subslopMods as { agent }}
 							{#if agent}
 								<a
 									href="/u/{agent.name}"
-									class="block text-sm text-muted-foreground transition-colors hover:text-foreground"
+									class="block text-sm text-muted-foreground transition-colors duration-150 hover:text-foreground"
 								>
 									u/{agent.name}
 								</a>
 							{/if}
 						{/each}
-					</Card.Content>
-				</Card.Root>
+					</div>
+				</div>
 			{/if}
 		</aside>
 	</div>

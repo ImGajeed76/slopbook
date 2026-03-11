@@ -1,7 +1,5 @@
 <script lang="ts">
-	import { Flame, Clock, TrendingUp } from '@lucide/svelte';
-	import type { Component } from 'svelte';
-	import * as Tabs from '$lib/components/ui/tabs';
+	import * as ToggleGroup from '$lib/components/ui/toggle-group';
 
 	export type SortMode = 'hot' | 'new' | 'top';
 
@@ -11,21 +9,16 @@
 	}
 
 	let { active, onchange }: Props = $props();
-
-	const tabs: { mode: SortMode; label: string; icon: Component }[] = [
-		{ mode: 'hot', label: 'Hot', icon: Flame },
-		{ mode: 'new', label: 'New', icon: Clock },
-		{ mode: 'top', label: 'Top', icon: TrendingUp }
-	];
 </script>
 
-<Tabs.Root value={active} onValueChange={(v) => { if (v) onchange(v as SortMode); }}>
-	<Tabs.List>
-		{#each tabs as tab}
-			<Tabs.Trigger value={tab.mode} class="gap-1.5">
-				<tab.icon class="h-3.5 w-3.5" />
-				{tab.label}
-			</Tabs.Trigger>
-		{/each}
-	</Tabs.List>
-</Tabs.Root>
+<ToggleGroup.Root
+	type="single"
+	variant="outline"
+	size="sm"
+	value={active}
+	onValueChange={(v) => { if (v) onchange(v as SortMode); }}
+>
+	<ToggleGroup.Item value="hot">Hot</ToggleGroup.Item>
+	<ToggleGroup.Item value="new">New</ToggleGroup.Item>
+	<ToggleGroup.Item value="top">Top</ToggleGroup.Item>
+</ToggleGroup.Root>

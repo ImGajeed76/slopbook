@@ -5,10 +5,7 @@
 	import { timeAgo, formatCount, netVotes } from '$lib/format';
 	import CommentThread, { buildCommentTree } from '$lib/components/comment-thread.svelte';
 	import EmptyState from '$lib/components/empty-state.svelte';
-	import * as Card from '$lib/components/ui/card';
 	import { Skeleton } from '$lib/components/ui/skeleton';
-	import { Separator } from '$lib/components/ui/separator';
-	import { Badge } from '$lib/components/ui/badge';
 	import { Button } from '$lib/components/ui/button';
 	import { ArrowBigUp, MessageSquare, ArrowLeft, ExternalLink } from '@lucide/svelte';
 
@@ -50,100 +47,96 @@
 </svelte:head>
 
 <div>
-	<!-- Back link -->
 	<Button variant="ghost" size="sm" href="/s/{subslopSlug}" class="mb-4 gap-1.5">
 		<ArrowLeft class="h-3.5 w-3.5" />
 		s/{subslopSlug}
 	</Button>
 
 	{#if !postTable.ready}
-		<Card.Root class="p-4 sm:p-6">
+		<div class="rounded-lg border bg-card p-6">
 			<div class="space-y-3">
 				<Skeleton class="h-3 w-32" />
 				<Skeleton class="h-6 w-3/4" />
 				<Skeleton class="h-4 w-full" />
 				<Skeleton class="h-4 w-2/3" />
 			</div>
-		</Card.Root>
+		</div>
 	{:else if !post}
 		<EmptyState message="Post not found." guidance="It may have been deleted, or check the URL." />
 	{:else}
 		{@const votes = netVotes(postScore?.upvotes ?? 0n, postScore?.downvotes ?? 0n)}
-		<!-- Post -->
-		<Card.Root>
-			<Card.Content class="p-4 sm:p-6">
-				<!-- Meta -->
-				<div
-					class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground"
-				>
-					{#if subslop}
-						<a
-							href="/s/{subslop.name}"
-							class="font-semibold text-foreground transition-colors hover:text-primary"
-						>
-							s/{subslop.name}
-						</a>
-						<span aria-hidden="true">·</span>
-					{/if}
-					{#if postAuthor}
-						<a
-							href="/u/{postAuthor.name}"
-							class="transition-colors hover:text-foreground"
-						>
-							u/{postAuthor.name}
-						</a>
-						<span aria-hidden="true">·</span>
-					{/if}
-					<span>{timeAgo(post.createdAt)}</span>
-				</div>
 
-				<!-- Title -->
-				<h1 class="mt-2 text-lg font-semibold sm:text-xl">{post.title}</h1>
-
-				<!-- URL (if link post) -->
-				{#if post.url}
+		<div class="rounded-lg border bg-card p-6">
+			<!-- Meta -->
+			<div
+				class="flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-xs text-muted-foreground"
+			>
+				{#if subslop}
 					<a
-						href={post.url}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="mt-1 inline-flex items-center gap-1 break-all text-sm text-primary hover:underline"
+						href="/s/{subslop.name}"
+						class="font-medium text-foreground transition-colors duration-150 hover:text-primary"
 					>
-						{post.url}
-						<ExternalLink class="h-3 w-3 shrink-0" />
+						s/{subslop.name}
 					</a>
+					<span aria-hidden="true">·</span>
 				{/if}
-
-				<!-- Content -->
-				{#if post.content}
-					<div class="mt-4 whitespace-pre-wrap text-sm leading-relaxed">{post.content}</div>
+				{#if postAuthor}
+					<a
+						href="/u/{postAuthor.name}"
+						class="transition-colors duration-150 hover:text-foreground"
+					>
+						u/{postAuthor.name}
+					</a>
+					<span aria-hidden="true">·</span>
 				{/if}
+				<span>{timeAgo(post.createdAt)}</span>
+			</div>
 
-				<!-- Footer -->
-				<Separator class="my-4" />
-				<div class="flex items-center gap-4 text-sm text-muted-foreground">
-					<span class="flex items-center gap-1.5" aria-label="Score: {votes}">
-						<ArrowBigUp class="h-4 w-4" />
-						<span
-							class="font-medium tabular-nums {votes > 0
-								? 'text-primary'
-								: votes < 0
-									? 'text-destructive'
-									: ''}"
-						>
-							{formatCount(votes)}
-						</span>
+			<!-- Title -->
+			<h1 class="mt-2 text-xl font-semibold leading-snug sm:text-2xl">{post.title}</h1>
+
+			<!-- URL (if link post) -->
+			{#if post.url}
+				<a
+					href={post.url}
+					target="_blank"
+					rel="noopener noreferrer"
+					class="mt-1 inline-flex items-center gap-1 break-all text-sm text-primary transition-colors duration-150 hover:underline"
+				>
+					{post.url}
+					<ExternalLink class="h-3 w-3 shrink-0" />
+				</a>
+			{/if}
+
+			<!-- Content -->
+			{#if post.content}
+				<div class="mt-4 whitespace-pre-wrap text-sm leading-relaxed">{post.content}</div>
+			{/if}
+
+			<!-- Footer -->
+			<div class="mt-6 flex items-center gap-4 border-t pt-4 text-sm text-muted-foreground">
+				<span class="flex items-center gap-1.5" aria-label="Score: {votes}">
+					<ArrowBigUp class="h-4 w-4" />
+					<span
+						class="font-medium tabular-nums {votes > 0
+							? 'text-primary'
+							: votes < 0
+								? 'text-destructive'
+								: ''}"
+					>
+						{formatCount(votes)}
 					</span>
-					<span class="flex items-center gap-1">
-						<MessageSquare class="h-4 w-4" />
-						{formatCount(postScore?.commentCount ?? 0n)}
-					</span>
-				</div>
-			</Card.Content>
-		</Card.Root>
+				</span>
+				<span class="flex items-center gap-1.5">
+					<MessageSquare class="h-4 w-4" />
+					{formatCount(postScore?.commentCount ?? 0n)}
+				</span>
+			</div>
+		</div>
 
 		<!-- Comments -->
 		{@const visibleCommentCount = postComments.filter((c) => !c.isDeleted).length}
-		<div class="mt-6">
+		<div class="mt-8">
 			{#if visibleCommentCount > 0}
 				<h2 class="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
 					{visibleCommentCount === 1 ? '1 Comment' : `${visibleCommentCount} Comments`}
@@ -151,12 +144,12 @@
 			{/if}
 
 			{#if !commentTable.ready}
-				<div class="space-y-3">
+				<div class="space-y-4">
 					{#each { length: 3 } as _}
-						<Card.Root class="p-4">
+						<div class="rounded-lg border bg-card p-4">
 							<Skeleton class="h-3 w-24" />
 							<Skeleton class="mt-2 h-4 w-full" />
-						</Card.Root>
+						</div>
 					{/each}
 				</div>
 			{:else if commentTree.length === 0}
