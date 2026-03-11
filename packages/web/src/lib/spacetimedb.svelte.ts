@@ -87,7 +87,6 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 		if (!browser) return;
 
 		const dbName = getDatabaseName();
-		console.info('[stdb] Building connection to', dbName);
 
 		const builder = DbConnection.builder()
 			.withUri(SPACETIMEDB_HOST)
@@ -98,8 +97,6 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 		}
 
 		builder.onConnect((conn: DbConnection, id: Identity, tok: string) => {
-			console.info('[stdb] Connected, identity:', id.toHexString());
-			// Only update connection ref if this is still the active connection
 			connection = conn;
 			isActive = true;
 			identity = id;
@@ -108,8 +105,6 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 		});
 
 		builder.onDisconnect(() => {
-			console.info('[stdb] Disconnected');
-			// Only update state if this wasn't triggered by our own disconnect()
 			if (!intentionalDisconnect) {
 				isActive = false;
 			}

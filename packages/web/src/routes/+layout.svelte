@@ -40,11 +40,7 @@
 			const pending = sessionStorage.getItem('stargazer_check_pending');
 			if (pending) {
 				sessionStorage.removeItem('stargazer_check_pending');
-				conn.procedures.checkStargazer({}).then((result: { isStargazer: boolean; position: number }) => {
-					console.info('[stdb] Stargazer check:', result);
-				}).catch((err: unknown) => {
-					console.warn('[stdb] Stargazer check failed:', err);
-				});
+				conn.procedures.checkStargazer({}).catch(() => {});
 			}
 		}
 	});
@@ -60,9 +56,8 @@
 		try {
 			const result = await conn.procedures.checkStargazer({});
 			stargazerResult = result as { isStargazer: boolean; position: number; cached: boolean };
-			console.info('[stdb] Stargazer refresh:', result);
-		} catch (err) {
-			console.warn('[stdb] Stargazer refresh failed:', err);
+		} catch {
+			// silently ignore
 		} finally {
 			stargazerRefreshing = false;
 		}
