@@ -7,13 +7,13 @@ import { computeHotScore, timestampToSeconds } from '../lib/scoring.js';
 
 export const create_post = spacetimedb.reducer(
   {
-    submoltName: t.string(),
+    subslopName: t.string(),
     title: t.string(),
     content: t.string(),
     url: t.string(),
     postType: t.string(),
   },
-  (ctx, { submoltName, title, content, url, postType }) => {
+  (ctx, { subslopName, title, content, url, postType }) => {
     const agent = requireAgent(ctx, ctx.sender);
     enforceRateLimit(ctx, agent.id, 'post');
 
@@ -32,17 +32,17 @@ export const create_post = spacetimedb.reducer(
       validateUrl(url, 'Post URL');
     }
 
-    // Find the submolt
-    const submolt = ctx.db.submolt.name.find(submoltName.trim().toLowerCase());
-    if (!submolt) {
-      throw new SenderError(`Submolt "${submoltName}" not found.`);
+    // Find the subslop
+    const subslop = ctx.db.subslop.name.find(subslopName.trim().toLowerCase());
+    if (!subslop) {
+      throw new SenderError(`Subslop "${subslopName}" not found.`);
     }
 
     const createdAtSeconds = timestampToSeconds(ctx.timestamp.microsSinceUnixEpoch);
 
     const post = ctx.db.post.insert({
       id: 0n,
-      submoltId: submolt.id,
+      subslopId: subslop.id,
       authorAgentId: agent.id,
       title: validTitle,
       content,
@@ -63,12 +63,12 @@ export const create_post = spacetimedb.reducer(
       createdAtSeconds,
     });
 
-    // Update submolt post count
-    const submoltStats = ctx.db.submoltStats.submoltId.find(submolt.id);
-    if (submoltStats) {
-      ctx.db.submoltStats.submoltId.update({
-        ...submoltStats,
-        postCount: submoltStats.postCount + 1n,
+    // Update subslop post count
+    const subslopStats = ctx.db.subslopStats.subslopId.find(subslop.id);
+    if (subslopStats) {
+      ctx.db.subslopStats.subslopId.update({
+        ...subslopStats,
+        postCount: subslopStats.postCount + 1n,
       });
     }
 
@@ -82,7 +82,7 @@ export const create_post = spacetimedb.reducer(
       });
     }
 
-    console.info(`Post "${validTitle}" created in m/${submolt.name} by ${agent.name}.`);
+    console.info(`Post "${validTitle}" created in s/${subslop.name} by ${agent.name}.`);
   },
 );
 
@@ -106,12 +106,12 @@ export const delete_post = spacetimedb.reducer(
 
     ctx.db.post.id.update({ ...post, isDeleted: true });
 
-    // Decrement submolt post count
-    const submoltStats = ctx.db.submoltStats.submoltId.find(post.submoltId);
-    if (submoltStats && submoltStats.postCount > 0n) {
-      ctx.db.submoltStats.submoltId.update({
-        ...submoltStats,
-        postCount: submoltStats.postCount - 1n,
+    // Decrement subslop post count
+    const subslopStats = ctx.db.subslopStats.subslopId.find(post.subslopId);
+    if (subslopStats && subslopStats.postCount > 0n) {
+      ctx.db.subslopStats.subslopId.update({
+        ...subslopStats,
+        postCount: subslopStats.postCount - 1n,
       });
     }
 

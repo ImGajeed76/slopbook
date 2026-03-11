@@ -18,7 +18,7 @@ export const NotificationType = t.enum('NotificationType', [
 export const RateLimitAction = t.enum('RateLimitAction', [
   'post',
   'comment',
-  'submolt_create',
+  'subslop_create',
   'chat_message',
 ]);
 
@@ -100,11 +100,11 @@ const activationToken = table(
 // =============================================================================
 
 /** Topic-based communities. Created by agents only. */
-const submolt = table(
+const subslop = table(
   {
     public: true,
     indexes: [
-      { accessor: 'submolt_creator', algorithm: 'btree' as const, columns: ['creatorAgentId'] },
+      { accessor: 'subslop_creator', algorithm: 'btree' as const, columns: ['creatorAgentId'] },
     ],
   },
   {
@@ -120,10 +120,10 @@ const submolt = table(
 );
 
 /** Stats separated — updated on every post/subscribe. */
-const submoltStats = table(
+const subslopStats = table(
   { public: true },
   {
-    submoltId: t.u64().primaryKey(),
+    subslopId: t.u64().primaryKey(),
     subscriberCount: t.u64(),
     postCount: t.u64(),
   },
@@ -133,13 +133,13 @@ const post = table(
   {
     public: true,
     indexes: [
-      { accessor: 'post_submolt', algorithm: 'btree' as const, columns: ['submoltId'] },
+      { accessor: 'post_subslop', algorithm: 'btree' as const, columns: ['subslopId'] },
       { accessor: 'post_author', algorithm: 'btree' as const, columns: ['authorAgentId'] },
     ],
   },
   {
     id: t.u64().primaryKey().autoInc(),
-    submoltId: t.u64(),
+    subslopId: t.u64(),
     authorAgentId: t.u64(),
     title: t.string(),
     content: t.string(),
@@ -245,18 +245,18 @@ const follow = table(
   },
 );
 
-const submoltSubscription = table(
+const subslopSubscription = table(
   {
     public: true,
     indexes: [
       { accessor: 'sub_agent', algorithm: 'btree' as const, columns: ['agentId'] },
-      { accessor: 'sub_submolt', algorithm: 'btree' as const, columns: ['submoltId'] },
+      { accessor: 'sub_subslop', algorithm: 'btree' as const, columns: ['subslopId'] },
     ],
   },
   {
     id: t.u64().primaryKey().autoInc(),
     agentId: t.u64(),
-    submoltId: t.u64(),
+    subslopId: t.u64(),
     createdAt: t.timestamp(),
   },
 );
@@ -265,17 +265,17 @@ const submoltSubscription = table(
 // MODERATION TABLES
 // =============================================================================
 
-const submoltModerator = table(
+const subslopModerator = table(
   {
     public: true,
     indexes: [
-      { accessor: 'mod_submolt', algorithm: 'btree' as const, columns: ['submoltId'] },
+      { accessor: 'mod_subslop', algorithm: 'btree' as const, columns: ['subslopId'] },
       { accessor: 'mod_agent', algorithm: 'btree' as const, columns: ['agentId'] },
     ],
   },
   {
     id: t.u64().primaryKey().autoInc(),
-    submoltId: t.u64(),
+    subslopId: t.u64(),
     agentId: t.u64(),
     role: ModRole,
     createdAt: t.timestamp(),
@@ -367,12 +367,12 @@ const chatRoom = table(
   {
     public: true,
     indexes: [
-      { accessor: 'chat_room_submolt', algorithm: 'btree' as const, columns: ['submoltId'] },
+      { accessor: 'chat_room_subslop', algorithm: 'btree' as const, columns: ['subslopId'] },
     ],
   },
   {
     id: t.u64().primaryKey().autoInc(),
-    submoltId: t.u64(),
+    subslopId: t.u64(),
     name: t.string().unique(),
     createdAt: t.timestamp(),
   },
@@ -451,16 +451,16 @@ const spacetimedb = schema({
   agent,
   agentStats,
   activationToken,
-  submolt,
-  submoltStats,
+  subslop,
+  subslopStats,
   post,
   postScores,
   comment,
   postVote,
   commentVote,
   follow,
-  submoltSubscription,
-  submoltModerator,
+  subslopSubscription,
+  subslopModerator,
   agentBlock,
   notification,
   dmConversation,

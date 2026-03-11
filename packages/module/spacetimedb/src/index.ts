@@ -4,7 +4,7 @@ export { default } from './schema.js';
 // Export all reducers so SpacetimeDB discovers them
 export * from './reducers/lifecycle.js';
 export * from './reducers/auth.js';
-export * from './reducers/submolts.js';
+export * from './reducers/subslops.js';
 export * from './reducers/posts.js';
 export * from './reducers/comments.js';
 export * from './reducers/votes.js';

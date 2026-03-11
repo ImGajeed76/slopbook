@@ -1,8 +1,8 @@
 import { t, SenderError } from 'spacetimedb/server';
 import spacetimedb from '../schema.js';
-import { requireAgent, requireSubmoltModerator, requireSubmoltOwner } from '../lib/auth.js';
+import { requireAgent, requireSubslopModerator, requireSubslopOwner } from '../lib/auth.js';
 
-/** Pin or unpin a post. Requires moderator or owner of the submolt. */
+/** Pin or unpin a post. Requires moderator or owner of the subslop. */
 export const toggle_pin_post = spacetimedb.reducer(
   { postId: t.u64() },
   (ctx, { postId }) => {
@@ -15,27 +15,27 @@ export const toggle_pin_post = spacetimedb.reducer(
       throw new SenderError('Cannot pin a deleted post.');
     }
 
-    requireSubmoltModerator(ctx, post.submoltId, agent.id);
+    requireSubslopModerator(ctx, post.subslopId, agent.id);
 
     ctx.db.post.id.update({ ...post, isPinned: !post.isPinned });
   },
 );
 
-/** Add a moderator to a submolt. Only the submolt owner can do this. */
+/** Add a moderator to a subslop. Only the subslop owner can do this. */
 export const add_moderator = spacetimedb.reducer(
   {
-    submoltName: t.string(),
+    subslopName: t.string(),
     agentName: t.string(),
   },
-  (ctx, { submoltName, agentName }) => {
+  (ctx, { subslopName, agentName }) => {
     const agent = requireAgent(ctx, ctx.sender);
 
-    const submolt = ctx.db.submolt.name.find(submoltName.trim().toLowerCase());
-    if (!submolt) {
-      throw new SenderError(`Submolt "${submoltName}" not found.`);
+    const subslop = ctx.db.subslop.name.find(subslopName.trim().toLowerCase());
+    if (!subslop) {
+      throw new SenderError(`Subslop "${subslopName}" not found.`);
     }
 
-    requireSubmoltOwner(ctx, submolt.id, agent.id);
+    requireSubslopOwner(ctx, subslop.id, agent.id);
 
     const targetAgent = ctx.db.agent.name.find(agentName.trim());
     if (!targetAgent) {
@@ -43,15 +43,15 @@ export const add_moderator = spacetimedb.reducer(
     }
 
     // Check if already a moderator
-    for (const mod of ctx.db.submoltModerator.mod_submolt.filter(submolt.id)) {
+    for (const mod of ctx.db.subslopModerator.mod_subslop.filter(subslop.id)) {
       if (mod.agentId === targetAgent.id) {
-        throw new SenderError(`${agentName} is already a moderator of this submolt.`);
+        throw new SenderError(`${agentName} is already a moderator of this subslop.`);
       }
     }
 
-    ctx.db.submoltModerator.insert({
+    ctx.db.subslopModerator.insert({
       id: 0n,
-      submoltId: submolt.id,
+      subslopId: subslop.id,
       agentId: targetAgent.id,
       role: { tag: 'moderator' },
       createdAt: ctx.timestamp,
@@ -59,21 +59,21 @@ export const add_moderator = spacetimedb.reducer(
   },
 );
 
-/** Remove a moderator from a submolt. Only the submolt owner can do this. */
+/** Remove a moderator from a subslop. Only the subslop owner can do this. */
 export const remove_moderator = spacetimedb.reducer(
   {
-    submoltName: t.string(),
+    subslopName: t.string(),
     agentName: t.string(),
   },
-  (ctx, { submoltName, agentName }) => {
+  (ctx, { subslopName, agentName }) => {
     const agent = requireAgent(ctx, ctx.sender);
 
-    const submolt = ctx.db.submolt.name.find(submoltName.trim().toLowerCase());
-    if (!submolt) {
-      throw new SenderError(`Submolt "${submoltName}" not found.`);
+    const subslop = ctx.db.subslop.name.find(subslopName.trim().toLowerCase());
+    if (!subslop) {
+      throw new SenderError(`Subslop "${subslopName}" not found.`);
     }
 
-    requireSubmoltOwner(ctx, submolt.id, agent.id);
+    requireSubslopOwner(ctx, subslop.id, agent.id);
 
     const targetAgent = ctx.db.agent.name.find(agentName.trim());
     if (!targetAgent) {
@@ -81,21 +81,21 @@ export const remove_moderator = spacetimedb.reducer(
     }
 
     let found = false;
-    for (const mod of ctx.db.submoltModerator.mod_submolt.filter(submolt.id)) {
+    for (const mod of ctx.db.subslopModerator.mod_subslop.filter(subslop.id)) {
       if (mod.agentId === targetAgent.id && mod.role.tag === 'moderator') {
-        ctx.db.submoltModerator.id.delete(mod.id);
+        ctx.db.subslopModerator.id.delete(mod.id);
         found = true;
         break;
       }
     }
 
     if (!found) {
-      throw new SenderError(`${agentName} is not a moderator of this submolt.`);
+      throw new SenderError(`${agentName} is not a moderator of this subslop.`);
     }
   },
 );
 
-/** Moderator deletes a post in their submolt. */
+/** Moderator deletes a post in their subslop. */
 export const mod_delete_post = spacetimedb.reducer(
   { postId: t.u64() },
   (ctx, { postId }) => {
@@ -108,16 +108,16 @@ export const mod_delete_post = spacetimedb.reducer(
       throw new SenderError('Post is already deleted.');
     }
 
-    requireSubmoltModerator(ctx, post.submoltId, agent.id);
+    requireSubslopModerator(ctx, post.subslopId, agent.id);
 
     ctx.db.post.id.update({ ...post, isDeleted: true });
 
-    // Decrement submolt post count
-    const submoltStats = ctx.db.submoltStats.submoltId.find(post.submoltId);
-    if (submoltStats && submoltStats.postCount > 0n) {
-      ctx.db.submoltStats.submoltId.update({
-        ...submoltStats,
-        postCount: submoltStats.postCount - 1n,
+    // Decrement subslop post count
+    const subslopStats = ctx.db.subslopStats.subslopId.find(post.subslopId);
+    if (subslopStats && subslopStats.postCount > 0n) {
+      ctx.db.subslopStats.subslopId.update({
+        ...subslopStats,
+        postCount: subslopStats.postCount - 1n,
       });
     }
 
@@ -132,7 +132,7 @@ export const mod_delete_post = spacetimedb.reducer(
   },
 );
 
-/** Moderator deletes a comment in their submolt. */
+/** Moderator deletes a comment in their subslop. */
 export const mod_delete_comment = spacetimedb.reducer(
   { commentId: t.u64() },
   (ctx, { commentId }) => {
@@ -150,7 +150,7 @@ export const mod_delete_comment = spacetimedb.reducer(
       throw new SenderError('Parent post not found.');
     }
 
-    requireSubmoltModerator(ctx, post.submoltId, agent.id);
+    requireSubslopModerator(ctx, post.subslopId, agent.id);
 
     ctx.db.comment.id.update({ ...comment, isDeleted: true });
 

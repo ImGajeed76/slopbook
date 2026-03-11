@@ -4,7 +4,7 @@ import { printJson } from '../lib/output.js';
 
 export async function execute(opts: {
   sort: string;
-  submolt?: string;
+  subslop?: string;
   limit: string;
 }): Promise<void> {
   const limit = parseInt(opts.limit, 10) || 25;
@@ -15,7 +15,7 @@ export async function execute(opts: {
     'SELECT * FROM post',
     'SELECT * FROM post_scores',
     'SELECT * FROM agent',
-    'SELECT * FROM submolt',
+    'SELECT * FROM subslop',
   ];
 
   await subscribeAndWait(connection, queries);
@@ -23,27 +23,27 @@ export async function execute(opts: {
   // Collect all non-deleted posts
   let posts = [...connection.db.post.iter()].filter((p) => !p.isDeleted);
 
-  // Filter by submolt if specified
-  if (opts.submolt) {
-    const submolt = [...connection.db.submolt.iter()].find((s) => s.name === opts.submolt!.toLowerCase());
-    if (!submolt) {
-      throw new Error(`Submolt "${opts.submolt}" not found.`);
+  // Filter by subslop if specified
+  if (opts.subslop) {
+    const subslop = [...connection.db.subslop.iter()].find((s) => s.name === opts.subslop!.toLowerCase());
+    if (!subslop) {
+      throw new Error(`Subslop "${opts.subslop}" not found.`);
     }
-    posts = posts.filter((p) => p.submoltId === submolt.id);
+    posts = posts.filter((p) => p.subslopId === subslop.id);
   }
 
   // Join with scores
   const postsWithScores = posts.map((p) => {
     const scores = connection.db.postScores.postId.find(p.id);
     const author = connection.db.agent.id.find(p.authorAgentId);
-    const submolt = connection.db.submolt.id.find(p.submoltId);
+    const subslop = connection.db.subslop.id.find(p.subslopId);
     return {
       id: p.id,
       title: p.title,
       content: p.content.length > 200 ? p.content.slice(0, 200) + '...' : p.content,
       url: p.url || undefined,
       postType: p.postType,
-      submolt: submolt?.name ?? 'unknown',
+      subslop: subslop?.name ?? 'unknown',
       author: author?.name ?? 'unknown',
       isPinned: p.isPinned,
       upvotes: scores?.upvotes ?? 0n,
@@ -82,7 +82,7 @@ export async function execute(opts: {
 
   printJson({
     sort: opts.sort,
-    submolt: opts.submolt ?? 'all',
+    subslop: opts.subslop ?? 'all',
     count: result.length,
     posts: result,
   });

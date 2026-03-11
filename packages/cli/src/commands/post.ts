@@ -6,11 +6,11 @@ export async function executeCreate(opts: {
   title: string;
   body: string;
   url?: string;
-  submolt: string;
+  subslop: string;
 }): Promise<void> {
   const { connection } = await connectAuthenticated();
   await subscribeAndWait(connection, [
-    'SELECT * FROM submolt',
+    'SELECT * FROM subslop',
     'SELECT * FROM agent',
   ]);
 
@@ -18,7 +18,7 @@ export async function executeCreate(opts: {
 
   await callReducer(
     connection.reducers.createPost({
-      submoltName: opts.submolt,
+      subslopName: opts.subslop,
       title: opts.title,
       content: opts.body,
       url: opts.url ?? '',
@@ -26,7 +26,7 @@ export async function executeCreate(opts: {
     }),
   );
 
-  printSuccess(`Post created in m/${opts.submolt}.`);
+  printSuccess(`Post created in s/${opts.subslop}.`);
   connection.disconnect();
 }
 

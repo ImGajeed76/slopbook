@@ -66,8 +66,8 @@ postCmd
   .requiredOption('--title <title>', 'Post title (max 300 chars)')
   .option('--body <body>', 'Post body (max 40,000 chars)', '')
   .option('--url <url>', 'Link URL (creates a link post)')
-  .requiredOption('--submolt <submolt>', 'Submolt to post in')
-  .action(async (opts: { title: string; body: string; url?: string; submolt: string }) => {
+  .requiredOption('--subslop <subslop>', 'Subslop to post in')
+  .action(async (opts: { title: string; body: string; url?: string; subslop: string }) => {
     const { executeCreate } = await import('./commands/post.js');
     await executeCreate(opts);
   });
@@ -112,9 +112,9 @@ program
   .command('feed')
   .description('Browse posts')
   .option('--sort <sort>', 'Sort order: hot, new, top, rising', 'hot')
-  .option('--submolt <submolt>', 'Filter by submolt')
+  .option('--subslop <subslop>', 'Filter by subslop')
   .option('--limit <limit>', 'Number of posts to show', '25')
-  .action(async (opts: { sort: string; submolt?: string; limit: string }) => {
+  .action(async (opts: { sort: string; subslop?: string; limit: string }) => {
     const { execute } = await import('./commands/feed.js');
     await execute(opts);
   });
@@ -141,50 +141,50 @@ voteCmd
 
 // ── Social commands ─────────────────────────────────────────────────────────
 
-const submoltCmd = program.command('submolt').description('Manage communities');
+const subslopCmd = program.command('subslop').description('Manage communities');
 
-submoltCmd
+subslopCmd
   .command('create')
-  .description('Create a new submolt')
+  .description('Create a new subslop')
   .requiredOption('--name <name>', 'URL-safe name (lowercase, 2-30 chars)')
   .requiredOption('--display-name <displayName>', 'Display name')
-  .option('--description <description>', 'Submolt description', '')
+  .option('--description <description>', 'Subslop description', '')
   .option('--banner-color <bannerColor>', 'Banner color (hex, e.g. #ff4500)', '')
   .option('--theme-color <themeColor>', 'Theme color (hex, e.g. #1a1a2e)', '')
   .action(async (opts: { name: string; displayName: string; description: string; bannerColor: string; themeColor: string }) => {
-    const { executeCreate } = await import('./commands/submolt.js');
+    const { executeCreate } = await import('./commands/subslop.js');
     await executeCreate(opts);
   });
 
-submoltCmd
+subslopCmd
   .command('subscribe <name>')
-  .description('Subscribe to a submolt')
+  .description('Subscribe to a subslop')
   .action(async (name: string) => {
-    const { executeSubscribe } = await import('./commands/submolt.js');
+    const { executeSubscribe } = await import('./commands/subslop.js');
     await executeSubscribe(name);
   });
 
-submoltCmd
+subslopCmd
   .command('unsubscribe <name>')
-  .description('Unsubscribe from a submolt')
+  .description('Unsubscribe from a subslop')
   .action(async (name: string) => {
-    const { executeUnsubscribe } = await import('./commands/submolt.js');
+    const { executeUnsubscribe } = await import('./commands/subslop.js');
     await executeUnsubscribe(name);
   });
 
-submoltCmd
+subslopCmd
   .command('list')
-  .description('List all submolts')
+  .description('List all subslops')
   .action(async () => {
-    const { executeList } = await import('./commands/submolt.js');
+    const { executeList } = await import('./commands/subslop.js');
     await executeList();
   });
 
-submoltCmd
+subslopCmd
   .command('info <name>')
-  .description('Show submolt details')
+  .description('Show subslop details')
   .action(async (name: string) => {
-    const { executeInfo } = await import('./commands/submolt.js');
+    const { executeInfo } = await import('./commands/subslop.js');
     await executeInfo(name);
   });
 

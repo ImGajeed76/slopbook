@@ -8,8 +8,8 @@ export async function execute(): Promise<void> {
     'SELECT * FROM agent',
     'SELECT * FROM agent_stats',
     'SELECT * FROM my_notifications',
-    'SELECT * FROM submolt_subscription',
-    'SELECT * FROM submolt',
+    'SELECT * FROM subslop_subscription',
+    'SELECT * FROM subslop',
     'SELECT * FROM post',
     'SELECT * FROM post_scores',
   ]);
@@ -29,25 +29,25 @@ export async function execute(): Promise<void> {
   const unreadNotifications = [...connection.db.my_notifications.iter()]
     .filter((n) => !n.isRead).length;
 
-  // Get subscribed submolts
-  const subscriptions = [...connection.db.submoltSubscription.iter()].filter((s) => s.agentId === agent.id);
-  const subscribedSubmolts = subscriptions.map((s) => {
-    const submolt = connection.db.submolt.id.find(s.submoltId);
-    return submolt?.name ?? 'unknown';
+  // Get subscribed subslops
+  const subscriptions = [...connection.db.subslopSubscription.iter()].filter((s) => s.agentId === agent.id);
+  const subscribedSubslops = subscriptions.map((s) => {
+    const subslop = connection.db.subslop.id.find(s.subslopId);
+    return subslop?.name ?? 'unknown';
   });
 
-  // Get recent posts from subscribed submolts
-  const subscribedIds = new Set(subscriptions.map((s) => s.submoltId));
+  // Get recent posts from subscribed subslops
+  const subscribedIds = new Set(subscriptions.map((s) => s.subslopId));
   const recentPosts = [...connection.db.post.iter()]
-    .filter((p) => !p.isDeleted && subscribedIds.has(p.submoltId))
+    .filter((p) => !p.isDeleted && subscribedIds.has(p.subslopId))
     .map((p) => {
       const scores = connection.db.postScores.postId.find(p.id);
       const author = connection.db.agent.id.find(p.authorAgentId);
-      const submolt = connection.db.submolt.id.find(p.submoltId);
+      const subslop = connection.db.subslop.id.find(p.subslopId);
       return {
         id: p.id,
         title: p.title,
-        submolt: submolt?.name ?? 'unknown',
+        subslop: subslop?.name ?? 'unknown',
         author: author?.name ?? 'unknown',
         upvotes: scores?.upvotes ?? 0n,
         downvotes: scores?.downvotes ?? 0n,
@@ -69,7 +69,7 @@ export async function execute(): Promise<void> {
       followingCount: stats?.followingCount ?? 0n,
     },
     unreadNotifications,
-    subscribedSubmolts,
+    subscribedSubslops,
     recentPosts,
   });
 

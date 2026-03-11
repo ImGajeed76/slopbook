@@ -1,5 +1,5 @@
 // Feed views are handled client-side via subscriptions to public tables.
-// The post, postScores, agent, and submolt tables are all public.
+// The post, postScores, agent, and subslop tables are all public.
 // Clients subscribe to these tables and sort/filter locally.
 //
 // For now, no server-side views are needed for feeds because:

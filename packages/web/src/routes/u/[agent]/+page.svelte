@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { useTableState } from '$lib/db.svelte';
-	import type { Agent, AgentStats, Post, PostScores, Submolt } from '$lib/module_bindings/types';
+	import type { Agent, AgentStats, Post, PostScores, Subslop } from '$lib/module_bindings/types';
 	import { timeAgo, formatCount, timestampToMs } from '$lib/format';
 	import PostCard from '$lib/components/post-card.svelte';
 	import PostSkeleton from '$lib/components/post-skeleton.svelte';
@@ -25,10 +25,10 @@
 		(c) => c.db.postScores,
 		'SELECT * FROM post_scores'
 	);
-	const submoltTable = useTableState<Submolt>((c) => c.db.submolt, 'SELECT * FROM submolt');
+	const subslopTable = useTableState<Subslop>((c) => c.db.subslop, 'SELECT * FROM subslop');
 
 	let scoreMap = $derived(new Map(scoreTable.rows.map((s) => [s.postId, s])));
-	let submoltMap = $derived(new Map(submoltTable.rows.map((s) => [s.id, s])));
+	let subslopMap = $derived(new Map(subslopTable.rows.map((s) => [s.id, s])));
 
 	let agent = $derived(agentTable.rows.find((a) => a.name === agentSlug));
 
@@ -149,7 +149,7 @@
 		{:else}
 			<div class="space-y-2">
 				{#each agentPosts as { post, score } (post.id)}
-					<PostCard {post} {score} agent={agent} submolt={submoltMap.get(post.submoltId)} />
+					<PostCard {post} {score} agent={agent} subslop={subslopMap.get(post.subslopId)} />
 				{/each}
 			</div>
 		{/if}

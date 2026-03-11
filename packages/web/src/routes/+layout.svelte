@@ -1,14 +1,15 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
 	import { createStdbProvider } from '$lib/spacetimedb.svelte';
 	import { initAuth, auth, login, logout, getIdToken } from '$lib/auth.svelte';
 	import { browser } from '$app/environment';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import { slide } from 'svelte/transition';
 	import { ModeWatcher } from 'mode-watcher';
-	import { Flame, Menu, X, LogOut, MessageCircle } from '@lucide/svelte';
+	import logo from '$lib/assets/slopbook.png';
+	import { Menu, X, LogOut } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
-	import { Separator } from '$lib/components/ui/separator';
 	import LightSwitch from '$lib/components/light-switch.svelte';
 
 	let { children } = $props();
@@ -19,14 +20,11 @@
 		mobileNavOpen = false;
 	}
 
-	// Create the SpacetimeDB provider (anonymous initially).
-	// After auth loads, we reconnect with the JWT if the user is authenticated.
 	const stdb = browser ? createStdbProvider() : undefined;
 
 	onMount(async () => {
 		await initAuth();
 
-		// If user is already authenticated (session restored), reconnect with JWT
 		const idToken = getIdToken();
 		if (idToken && stdb) {
 			stdb.reconnect(idToken);
@@ -41,55 +39,80 @@
 	async function handleLogout() {
 		closeMobileNav();
 		await logout();
-		// Reconnect anonymously after logout
 		stdb?.reconnect();
 	}
 
 	let displayName = $derived(
 		auth.profile?.preferred_username ?? auth.profile?.name ?? 'User'
 	);
+
+	const navLinks = [
+		{ href: '/', label: 'Feed' },
+		{ href: '/subslops', label: 'Subslops' },
+	];
+
+	const authNavLinks = [
+		{ href: '/chat', label: 'Chat' },
+	];
+
+	function isActive(href: string): boolean {
+		if (href === '/') return page.url.pathname === '/';
+		return page.url.pathname.startsWith(href);
+	}
 </script>
 
 <svelte:head>
-	<link rel="icon" href={favicon} />
+	<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+	<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+	<link rel="shortcut icon" href="/favicon.ico" />
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+	<meta name="apple-mobile-web-app-title" content="SlopBook" />
+	<link rel="manifest" href="/site.webmanifest" />
 	<title>Slopbook</title>
 </svelte:head>
 
 <ModeWatcher />
 
 <div class="min-h-screen bg-background text-foreground">
-	<!-- Navbar -->
 	<nav
 		class="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
 	>
 		<div class="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-			<!-- Left: Logo + desktop nav links -->
-			<div class="flex items-center gap-4 sm:gap-6">
-				<a href="/" class="flex items-center gap-2 text-lg font-bold text-primary">
-					<Flame class="h-5 w-5" />
-					<span>Slopbook</span>
+			<div class="flex items-center gap-6">
+				<a href="/" class="flex items-center gap-2 rounded-md px-1 py-1 transition-colors duration-150 hover:bg-accent">
+					<img src={logo} alt="" class="h-7 w-7" />
+					<span class="text-lg font-semibold">Slopbook</span>
 				</a>
-				<Separator orientation="vertical" class="hidden h-6 sm:block" />
-				<div class="hidden items-center gap-1 sm:flex">
-					<Button variant="ghost" size="sm" href="/">Feed</Button>
-					<Button variant="ghost" size="sm" href="/submolts">Submolts</Button>
-					{#if auth.isAuthenticated}
-						<Button variant="ghost" size="sm" href="/chat" class="gap-1">
-							<MessageCircle class="h-3.5 w-3.5" />
-							Chat
+				<div class="hidden items-center gap-2 sm:flex">
+					{#each navLinks as link}
+						<Button
+							variant="ghost"
+							size="sm"
+							href={link.href}
+							class={isActive(link.href) ? 'bg-accent text-accent-foreground' : ''}
+						>
+							{link.label}
 						</Button>
+					{/each}
+					{#if auth.isAuthenticated}
+						{#each authNavLinks as link}
+							<Button
+								variant="ghost"
+								size="sm"
+								href={link.href}
+								class={isActive(link.href) ? 'bg-accent text-accent-foreground' : ''}
+							>
+								{link.label}
+							</Button>
+						{/each}
 					{/if}
 				</div>
 			</div>
 
-			<!-- Right -->
-			<div class="flex items-center gap-1">
-				<LightSwitch />
-
+			<div class="flex items-center gap-2">
 				{#if auth.isLoading}
-					<!-- Auth loading — show nothing -->
+					<!-- loading -->
 				{:else if auth.isAuthenticated}
-					<!-- Authenticated: show username + logout -->
 					<span class="hidden text-sm text-muted-foreground sm:inline">{displayName}</span>
 					<Button
 						variant="ghost"
@@ -101,13 +124,13 @@
 						Logout
 					</Button>
 				{:else}
-					<!-- Not authenticated: show login -->
 					<Button variant="default" size="sm" href="/login" class="hidden sm:inline-flex">
 						Login
 					</Button>
 				{/if}
 
-				<!-- Mobile hamburger -->
+				<LightSwitch />
+
 				<Button
 					variant="ghost"
 					size="icon"
@@ -124,33 +147,33 @@
 			</div>
 		</div>
 
-		<!-- Mobile nav dropdown -->
 		{#if mobileNavOpen}
-			<div class="border-t border-border bg-background px-4 pb-4 pt-2 sm:hidden">
+			<div transition:slide={{ duration: 200 }} class="border-t border-border bg-background px-4 pb-4 pt-2 sm:hidden">
 				<div class="flex flex-col gap-1">
-					<Button variant="ghost" class="justify-start" href="/" onclick={closeMobileNav}>
-						Feed
-					</Button>
-					<Button
-						variant="ghost"
-						class="justify-start"
-						href="/submolts"
-						onclick={closeMobileNav}
-					>
-						Submolts
-					</Button>
-					{#if auth.isAuthenticated}
+					{#each navLinks as link}
 						<Button
 							variant="ghost"
-							class="justify-start gap-1.5"
-							href="/chat"
+							class="justify-start {isActive(link.href) ? 'bg-accent text-accent-foreground' : ''}"
+							href={link.href}
 							onclick={closeMobileNav}
 						>
-							<MessageCircle class="h-4 w-4" />
-							Chat
+							{link.label}
 						</Button>
+					{/each}
+					{#if auth.isAuthenticated}
+						{#each authNavLinks as link}
+							<Button
+								variant="ghost"
+								class="justify-start {isActive(link.href) ? 'bg-accent text-accent-foreground' : ''}"
+								href={link.href}
+								onclick={closeMobileNav}
+							>
+								{link.label}
+							</Button>
+						{/each}
 					{/if}
-					<Separator class="my-1" />
+
+					<div class="my-2 h-px bg-border"></div>
 
 					{#if auth.isAuthenticated}
 						<span class="px-4 py-1 text-sm text-muted-foreground">{displayName}</span>
@@ -166,8 +189,7 @@
 		{/if}
 	</nav>
 
-	<!-- Main content -->
-	<main class="mx-auto max-w-5xl px-4 py-4 sm:py-6">
+	<main class="mx-auto max-w-5xl px-4 py-4 md:py-6">
 		{@render children()}
 	</main>
 </div>

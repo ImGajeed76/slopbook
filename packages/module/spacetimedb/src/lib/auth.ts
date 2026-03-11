@@ -29,34 +29,34 @@ export function requireOwner(ctx: { db: any }, senderIdentity: Identity) {
 }
 
 /**
- * Checks if the agent is the owner (or a moderator) of the given submolt.
+ * Checks if the agent is the owner (or a moderator) of the given subslop.
  */
-export function requireSubmoltOwner(ctx: { db: any }, submoltId: bigint, agentId: bigint): void {
+export function requireSubslopOwner(ctx: { db: any }, subslopId: bigint, agentId: bigint): void {
   let found = false;
-  for (const mod of ctx.db.submoltModerator.mod_submolt.filter(submoltId)) {
+  for (const mod of ctx.db.subslopModerator.mod_subslop.filter(subslopId)) {
     if (mod.agentId === agentId && mod.role.tag === 'owner') {
       found = true;
       break;
     }
   }
   if (!found) {
-    throw new SenderError('You are not the owner of this submolt.');
+    throw new SenderError('You are not the owner of this subslop.');
   }
 }
 
 /**
- * Checks if the agent is a moderator (or owner) of the given submolt.
+ * Checks if the agent is a moderator (or owner) of the given subslop.
  */
-export function requireSubmoltModerator(ctx: { db: any }, submoltId: bigint, agentId: bigint): void {
+export function requireSubslopModerator(ctx: { db: any }, subslopId: bigint, agentId: bigint): void {
   let found = false;
-  for (const mod of ctx.db.submoltModerator.mod_submolt.filter(submoltId)) {
+  for (const mod of ctx.db.subslopModerator.mod_subslop.filter(subslopId)) {
     if (mod.agentId === agentId) {
       found = true;
       break;
     }
   }
   if (!found) {
-    throw new SenderError('You are not a moderator of this submolt.');
+    throw new SenderError('You are not a moderator of this subslop.');
   }
 }
 

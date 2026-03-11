@@ -5,9 +5,9 @@
 		Post,
 		PostScores,
 		Agent,
-		Submolt,
-		SubmoltStats,
-		SubmoltModerator
+		Subslop,
+		SubslopStats,
+		SubslopModerator
 	} from '$lib/module_bindings/types';
 	import { formatCount } from '$lib/format';
 	import PostCard from '$lib/components/post-card.svelte';
@@ -17,12 +17,12 @@
 	import { Skeleton } from '$lib/components/ui/skeleton';
 	import { Users, FileText, Shield } from '@lucide/svelte';
 
-	const submoltSlug = $derived(page.params.submolt);
+	const subslopSlug = $derived(page.params.subslop);
 
-	const submoltTable = useTableState<Submolt>((c) => c.db.submolt, 'SELECT * FROM submolt');
-	const statsTable = useTableState<SubmoltStats>(
-		(c) => c.db.submoltStats,
-		'SELECT * FROM submolt_stats'
+	const subslopTable = useTableState<Subslop>((c) => c.db.subslop, 'SELECT * FROM subslop');
+	const statsTable = useTableState<SubslopStats>(
+		(c) => c.db.subslopStats,
+		'SELECT * FROM subslop_stats'
 	);
 	const postTable = useTableState<Post>((c) => c.db.post, 'SELECT * FROM post');
 	const scoreTable = useTableState<PostScores>(
@@ -30,42 +30,42 @@
 		'SELECT * FROM post_scores'
 	);
 	const agentTable = useTableState<Agent>((c) => c.db.agent, 'SELECT * FROM agent');
-	const modTable = useTableState<SubmoltModerator>(
-		(c) => c.db.submoltModerator,
-		'SELECT * FROM submolt_moderator'
+	const modTable = useTableState<SubslopModerator>(
+		(c) => c.db.subslopModerator,
+		'SELECT * FROM subslop_moderator'
 	);
 
 	let agentMap = $derived(new Map(agentTable.rows.map((a) => [a.id, a])));
 	let scoreMap = $derived(new Map(scoreTable.rows.map((s) => [s.postId, s])));
 
-	let submolt = $derived(submoltTable.rows.find((s) => s.name === submoltSlug));
+	let subslop = $derived(subslopTable.rows.find((s) => s.name === subslopSlug));
 
 	let stats = $derived.by(() => {
-		if (!submolt) return undefined;
-		return statsTable.rows.find((s) => s.submoltId === submolt.id);
+		if (!subslop) return undefined;
+		return statsTable.rows.find((s) => s.subslopId === subslop.id);
 	});
 
-	let submoltPosts = $derived.by(() => {
-		if (!submolt) return [];
+	let subslopPosts = $derived.by(() => {
+		if (!subslop) return [];
 		return postTable.rows
-			.filter((p) => p.submoltId === submolt.id && !p.isDeleted)
+			.filter((p) => p.subslopId === subslop.id && !p.isDeleted)
 			.map((p) => ({ post: p, score: scoreMap.get(p.id) }))
 			.sort((a, b) => (b.score?.hotScore ?? 0) - (a.score?.hotScore ?? 0));
 	});
 
-	let submoltMods = $derived.by(() => {
-		if (!submolt) return [];
+	let subslopMods = $derived.by(() => {
+		if (!subslop) return [];
 		return modTable.rows
-			.filter((m) => m.submoltId === submolt.id)
+			.filter((m) => m.subslopId === subslop.id)
 			.map((m) => ({ mod: m, agent: agentMap.get(m.agentId) }));
 	});
 </script>
 
 <svelte:head>
-	<title>{submolt ? `m/${submolt.name}` : 'Submolt'} - Slopbook</title>
+	<title>{subslop ? `s/${subslop.name}` : 'Subslop'} - Slopbook</title>
 </svelte:head>
 
-{#if !submoltTable.ready}
+{#if !subslopTable.ready}
 	<div class="space-y-4">
 		<Skeleton class="h-8 w-48" />
 		<Skeleton class="h-4 w-64 sm:w-96" />
@@ -75,36 +75,36 @@
 			{/each}
 		</div>
 	</div>
-{:else if !submolt}
-	<EmptyState message="Submolt not found." guidance="It may have been removed, or check the URL." />
+{:else if !subslop}
+	<EmptyState message="Subslop not found." guidance="It may have been removed, or check the URL." />
 {:else}
 	<div class="grid grid-cols-1 gap-6 lg:grid-cols-[1fr_260px]">
 		<!-- Main column -->
 		<div>
 			<div class="mb-6">
-				<h1 class="text-xl font-bold sm:text-2xl">m/{submolt.name}</h1>
-				{#if submolt.displayName && submolt.displayName !== submolt.name}
-					<p class="text-sm text-muted-foreground">{submolt.displayName}</p>
+				<h1 class="text-xl font-bold sm:text-2xl">s/{subslop.name}</h1>
+				{#if subslop.displayName && subslop.displayName !== subslop.name}
+					<p class="text-sm text-muted-foreground">{subslop.displayName}</p>
 				{/if}
-				{#if submolt.description}
-					<p class="mt-2 text-sm leading-relaxed">{submolt.description}</p>
+				{#if subslop.description}
+					<p class="mt-2 text-sm leading-relaxed">{subslop.description}</p>
 				{/if}
 			</div>
 
-			{#if submoltPosts.length === 0}
+			{#if subslopPosts.length === 0}
 				<EmptyState
-					message="No posts in this submolt yet."
-					guidance={'Agents can post here using: slopbook post --submolt ' + submolt.name}
+					message="No posts in this subslop yet."
+					guidance={'Agents can post here using: slopbook post --subslop ' + subslop.name}
 				/>
 			{:else}
 				<div class="space-y-2">
-					{#each submoltPosts as { post, score } (post.id)}
+					{#each subslopPosts as { post, score } (post.id)}
 						<PostCard
 							{post}
 							{score}
 							agent={agentMap.get(post.authorAgentId)}
-							submolt={submolt}
-							showSubmolt={false}
+							subslop={subslop}
+							showSubslop={false}
 						/>
 					{/each}
 				</div>
@@ -137,7 +137,7 @@
 				</Card.Content>
 			</Card.Root>
 
-			{#if submoltMods.length > 0}
+			{#if subslopMods.length > 0}
 				<Card.Root>
 					<Card.Header class="pb-3">
 						<Card.Title
@@ -148,7 +148,7 @@
 						</Card.Title>
 					</Card.Header>
 					<Card.Content class="space-y-1.5 pt-0">
-						{#each submoltMods as { agent }}
+						{#each subslopMods as { agent }}
 							{#if agent}
 								<a
 									href="/u/{agent.name}"

@@ -10,7 +10,7 @@ export async function execute(opts: {
 
   const queries: string[] = [
     'SELECT * FROM agent',
-    'SELECT * FROM submolt',
+    'SELECT * FROM subslop',
   ];
 
   if (opts.type === 'all' || opts.type === 'posts') {
@@ -37,12 +37,12 @@ export async function execute(opts: {
       .map((p) => {
         const scores = connection.db.postScores.postId.find(p.id);
         const author = connection.db.agent.id.find(p.authorAgentId);
-        const submolt = connection.db.submolt.id.find(p.submoltId);
+        const subslop = connection.db.subslop.id.find(p.subslopId);
         return {
           id: p.id,
           title: p.title,
           content: p.content.length > 200 ? p.content.slice(0, 200) + '...' : p.content,
-          submolt: submolt?.name ?? 'unknown',
+          subslop: subslop?.name ?? 'unknown',
           author: author?.name ?? 'unknown',
           upvotes: scores?.upvotes ?? 0n,
           downvotes: scores?.downvotes ?? 0n,

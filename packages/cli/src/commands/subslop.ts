@@ -13,7 +13,7 @@ export async function executeCreate(opts: {
   await subscribeAndWait(connection, 'SELECT * FROM agent');
 
   await callReducer(
-    connection.reducers.createSubmolt({
+    connection.reducers.createSubslop({
       name: opts.name,
       displayName: opts.displayName,
       description: opts.description,
@@ -22,7 +22,7 @@ export async function executeCreate(opts: {
     }),
   );
 
-  printSuccess(`Submolt m/${opts.name} created.`);
+  printSuccess(`Subslop s/${opts.name} created.`);
   connection.disconnect();
 }
 
@@ -30,14 +30,14 @@ export async function executeSubscribe(name: string): Promise<void> {
   const { connection } = await connectAuthenticated();
   await subscribeAndWait(connection, [
     'SELECT * FROM agent',
-    'SELECT * FROM submolt',
+    'SELECT * FROM subslop',
   ]);
 
   await callReducer(
-    connection.reducers.subscribeSubmolt({ submoltName: name }),
+    connection.reducers.subscribeSubslop({ subslopName: name }),
   );
 
-  printSuccess(`Subscribed to m/${name}.`);
+  printSuccess(`Subscribed to s/${name}.`);
   connection.disconnect();
 }
 
@@ -45,27 +45,27 @@ export async function executeUnsubscribe(name: string): Promise<void> {
   const { connection } = await connectAuthenticated();
   await subscribeAndWait(connection, [
     'SELECT * FROM agent',
-    'SELECT * FROM submolt',
-    'SELECT * FROM submolt_subscription',
+    'SELECT * FROM subslop',
+    'SELECT * FROM subslop_subscription',
   ]);
 
   await callReducer(
-    connection.reducers.unsubscribeSubmolt({ submoltName: name }),
+    connection.reducers.unsubscribeSubslop({ subslopName: name }),
   );
 
-  printSuccess(`Unsubscribed from m/${name}.`);
+  printSuccess(`Unsubscribed from s/${name}.`);
   connection.disconnect();
 }
 
 export async function executeList(): Promise<void> {
   const { connection } = await connectAuthenticated();
   await subscribeAndWait(connection, [
-    'SELECT * FROM submolt',
-    'SELECT * FROM submolt_stats',
+    'SELECT * FROM subslop',
+    'SELECT * FROM subslop_stats',
   ]);
 
-  const submolts = [...connection.db.submolt.iter()].map((s) => {
-    const stats = connection.db.submoltStats.submoltId.find(s.id);
+  const subslops = [...connection.db.subslop.iter()].map((s) => {
+    const stats = connection.db.subslopStats.subslopId.find(s.id);
     return {
       name: s.name,
       displayName: s.displayName,
@@ -77,33 +77,33 @@ export async function executeList(): Promise<void> {
   });
 
   // Sort by subscriber count descending
-  submolts.sort((a, b) => {
+  subslops.sort((a, b) => {
     const diff = BigInt(b.subscribers) - BigInt(a.subscribers);
     return diff > 0n ? 1 : diff < 0n ? -1 : 0;
   });
 
-  printJson({ count: submolts.length, submolts });
+  printJson({ count: subslops.length, subslops });
   connection.disconnect();
 }
 
 export async function executeInfo(name: string): Promise<void> {
   const { connection } = await connectAuthenticated();
   await subscribeAndWait(connection, [
-    'SELECT * FROM submolt',
-    'SELECT * FROM submolt_stats',
+    'SELECT * FROM subslop',
+    'SELECT * FROM subslop_stats',
     'SELECT * FROM agent',
-    'SELECT * FROM submolt_moderator',
+    'SELECT * FROM subslop_moderator',
   ]);
 
-  const submolt = [...connection.db.submolt.iter()].find((s) => s.name === name.toLowerCase());
-  if (!submolt) {
-    throw new Error(`Submolt "${name}" not found.`);
+  const subslop = [...connection.db.subslop.iter()].find((s) => s.name === name.toLowerCase());
+  if (!subslop) {
+    throw new Error(`Subslop "${name}" not found.`);
   }
 
-  const stats = connection.db.submoltStats.submoltId.find(submolt.id);
-  const creator = connection.db.agent.id.find(submolt.creatorAgentId);
+  const stats = connection.db.subslopStats.subslopId.find(subslop.id);
+  const creator = connection.db.agent.id.find(subslop.creatorAgentId);
 
-  const moderators = [...connection.db.submoltModerator.iter()].filter((m) => m.submoltId === submolt.id).map((m) => {
+  const moderators = [...connection.db.subslopModerator.iter()].filter((m) => m.subslopId === subslop.id).map((m) => {
     const agent = connection.db.agent.id.find(m.agentId);
     return {
       name: agent?.name ?? 'unknown',
@@ -112,16 +112,16 @@ export async function executeInfo(name: string): Promise<void> {
   });
 
   printJson({
-    name: submolt.name,
-    displayName: submolt.displayName,
-    description: submolt.description,
+    name: subslop.name,
+    displayName: subslop.displayName,
+    description: subslop.description,
     creator: creator?.name ?? 'unknown',
-    bannerColor: submolt.bannerColor,
-    themeColor: submolt.themeColor,
+    bannerColor: subslop.bannerColor,
+    themeColor: subslop.themeColor,
     subscribers: stats?.subscriberCount ?? 0n,
     posts: stats?.postCount ?? 0n,
     moderators,
-    createdAt: submolt.createdAt,
+    createdAt: subslop.createdAt,
   });
 
   connection.disconnect();

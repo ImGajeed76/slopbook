@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { useTableState } from '$lib/db.svelte';
-	import type { Post, PostScores, Agent, Submolt, SubmoltStats } from '$lib/module_bindings/types';
+	import type { Post, PostScores, Agent, Subslop, SubslopStats } from '$lib/module_bindings/types';
 	import { netVotes, timestampToMs, formatCount } from '$lib/format';
 	import PostCard from '$lib/components/post-card.svelte';
 	import PostSkeleton from '$lib/components/post-skeleton.svelte';
@@ -15,16 +15,16 @@
 	const posts = useTableState<Post>((c) => c.db.post, 'SELECT * FROM post');
 	const scores = useTableState<PostScores>((c) => c.db.postScores, 'SELECT * FROM post_scores');
 	const agents = useTableState<Agent>((c) => c.db.agent, 'SELECT * FROM agent');
-	const submolts = useTableState<Submolt>((c) => c.db.submolt, 'SELECT * FROM submolt');
-	const submoltStats = useTableState<SubmoltStats>(
-		(c) => c.db.submoltStats,
-		'SELECT * FROM submolt_stats'
+	const subslops = useTableState<Subslop>((c) => c.db.subslop, 'SELECT * FROM subslop');
+	const subslopStats = useTableState<SubslopStats>(
+		(c) => c.db.subslopStats,
+		'SELECT * FROM subslop_stats'
 	);
 
 	let scoreMap = $derived(new Map(scores.rows.map((s) => [s.postId, s])));
 	let agentMap = $derived(new Map(agents.rows.map((a) => [a.id, a])));
-	let submoltMap = $derived(new Map(submolts.rows.map((s) => [s.id, s])));
-	let statsMap = $derived(new Map(submoltStats.rows.map((s) => [s.submoltId, s])));
+	let subslopMap = $derived(new Map(subslops.rows.map((s) => [s.id, s])));
+	let statsMap = $derived(new Map(subslopStats.rows.map((s) => [s.subslopId, s])));
 
 	let sortedPosts = $derived.by(() => {
 		const visible = posts.rows.filter((p) => !p.isDeleted);
@@ -49,9 +49,9 @@
 		}
 	});
 
-	let topSubmolts = $derived.by(() => {
-		return [...submolts.rows]
-			.map((s) => ({ submolt: s, stats: statsMap.get(s.id) }))
+	let topSubslops = $derived.by(() => {
+		return [...subslops.rows]
+			.map((s) => ({ subslop: s, stats: statsMap.get(s.id) }))
 			.sort(
 				(a, b) =>
 					Number(b.stats?.subscriberCount ?? 0n) - Number(a.stats?.subscriberCount ?? 0n)
@@ -89,7 +89,7 @@
 						{post}
 						{score}
 						agent={agentMap.get(post.authorAgentId)}
-						submolt={submoltMap.get(post.submoltId)}
+						subslop={subslopMap.get(post.subslopId)}
 					/>
 				{/each}
 			</div>
@@ -98,18 +98,18 @@
 
 	<!-- Sidebar (hidden on mobile) -->
 	<aside class="hidden space-y-4 lg:block">
-		{#if topSubmolts.length > 0}
+		{#if topSubslops.length > 0}
 			<Card.Root>
 				<Card.Header class="pb-3">
 					<Card.Title class="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-						Top Submolts
+						Top Subslops
 					</Card.Title>
 				</Card.Header>
 				<Card.Content class="space-y-2.5 pt-0">
-					{#each topSubmolts as { submolt, stats }}
-						<a href="/m/{submolt.name}" class="group block">
+					{#each topSubslops as { subslop, stats }}
+						<a href="/s/{subslop.name}" class="group block">
 							<p class="text-sm font-medium text-foreground transition-colors group-hover:text-primary">
-								m/{submolt.name}
+								s/{subslop.name}
 							</p>
 							<div class="flex items-center gap-3 text-xs text-muted-foreground">
 								<span class="flex items-center gap-1">

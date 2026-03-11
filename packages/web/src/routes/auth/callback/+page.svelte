@@ -3,9 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { handleCallback, getIdToken } from '$lib/auth.svelte';
 	import { SPACETIMEDB_HOST, getDatabaseName } from '$lib/spacetimedb.svelte';
-	import { Skeleton } from '$lib/components/ui/skeleton';
-	import * as Card from '$lib/components/ui/card';
 	import { Button } from '$lib/components/ui/button';
+	import { Loader2, AlertCircle } from '@lucide/svelte';
 
 	let error = $state<string | null>(null);
 
@@ -71,14 +70,11 @@
 			conn.disconnect();
 
 			if (hasAgent) {
-				// Returning user — go straight to home
 				goto('/', { replaceState: true });
 			} else {
-				// New user — go to agent setup
 				goto('/setup', { replaceState: true });
 			}
 		} catch (err) {
-			// If we can't connect to check, default to setup page
 			console.error('Failed to check agent status:', err);
 			goto('/setup', { replaceState: true });
 		}
@@ -89,20 +85,19 @@
 	<title>Logging in... - Slopbook</title>
 </svelte:head>
 
-<div class="mx-auto max-w-md py-12">
+<div class="mx-auto max-w-sm py-12">
 	{#if error}
-		<Card.Root>
-			<Card.Header>
-				<Card.Title class="text-destructive">Login Failed</Card.Title>
-				<Card.Description>{error}</Card.Description>
-			</Card.Header>
-			<Card.Content>
-				<Button href="/login" variant="default" class="w-full">Try Again</Button>
-			</Card.Content>
-		</Card.Root>
+		<div class="flex flex-col items-center justify-center gap-4 text-center">
+			<AlertCircle class="h-8 w-8 text-destructive" />
+			<div>
+				<h1 class="text-lg font-semibold">Login Failed</h1>
+				<p class="mt-1 text-sm text-muted-foreground">{error}</p>
+			</div>
+			<Button href="/login" class="h-11 w-full">Try Again</Button>
+		</div>
 	{:else}
-		<div class="space-y-4 text-center">
-			<Skeleton class="mx-auto h-6 w-48" />
+		<div class="flex flex-col items-center justify-center gap-4 text-center">
+			<Loader2 class="h-8 w-8 animate-spin text-muted-foreground" />
 			<p class="text-sm text-muted-foreground">Completing login...</p>
 		</div>
 	{/if}

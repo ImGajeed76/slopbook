@@ -1,10 +1,10 @@
 import { t, SenderError } from 'spacetimedb/server';
 import spacetimedb from '../schema.js';
 import { requireAgent } from '../lib/auth.js';
-import { validateSubmoltName, requireNonEmpty, requireMaxLength, validateColor } from '../lib/validation.js';
+import { validateSubslopName, requireNonEmpty, requireMaxLength, validateColor } from '../lib/validation.js';
 import { enforceRateLimit } from '../lib/rate-limit.js';
 
-export const create_submolt = spacetimedb.reducer(
+export const create_subslop = spacetimedb.reducer(
   {
     name: t.string(),
     displayName: t.string(),
@@ -14,9 +14,9 @@ export const create_submolt = spacetimedb.reducer(
   },
   (ctx, { name, displayName, description, bannerColor, themeColor }) => {
     const agent = requireAgent(ctx, ctx.sender);
-    enforceRateLimit(ctx, agent.id, 'submolt_create');
+    enforceRateLimit(ctx, agent.id, 'subslop_create');
 
-    const validName = validateSubmoltName(name);
+    const validName = validateSubslopName(name);
     const validDisplayName = requireNonEmpty(displayName, 'Display name');
     requireMaxLength(validDisplayName, 100, 'Display name');
     requireMaxLength(description, 500, 'Description');
@@ -24,11 +24,11 @@ export const create_submolt = spacetimedb.reducer(
     const validThemeColor = validateColor(themeColor, 'Theme color');
 
     // Check if name is taken
-    if (ctx.db.submolt.name.find(validName)) {
-      throw new SenderError(`Submolt "${validName}" already exists.`);
+    if (ctx.db.subslop.name.find(validName)) {
+      throw new SenderError(`Subslop "${validName}" already exists.`);
     }
 
-    const submolt = ctx.db.submolt.insert({
+    const subslop = ctx.db.subslop.insert({
       id: 0n,
       name: validName,
       displayName: validDisplayName,
@@ -40,68 +40,68 @@ export const create_submolt = spacetimedb.reducer(
     });
 
     // Initialize stats
-    ctx.db.submoltStats.insert({
-      submoltId: submolt.id,
+    ctx.db.subslopStats.insert({
+      subslopId: subslop.id,
       subscriberCount: 1n,
       postCount: 0n,
     });
 
     // Creator is automatically the owner moderator
-    ctx.db.submoltModerator.insert({
+    ctx.db.subslopModerator.insert({
       id: 0n,
-      submoltId: submolt.id,
+      subslopId: subslop.id,
       agentId: agent.id,
       role: { tag: 'owner' },
       createdAt: ctx.timestamp,
     });
 
     // Creator is automatically subscribed
-    ctx.db.submoltSubscription.insert({
+    ctx.db.subslopSubscription.insert({
       id: 0n,
       agentId: agent.id,
-      submoltId: submolt.id,
+      subslopId: subslop.id,
       createdAt: ctx.timestamp,
     });
 
-    // Create a chat room for the submolt
+    // Create a chat room for the subslop
     ctx.db.chatRoom.insert({
       id: 0n,
-      submoltId: submolt.id,
-      name: `m/${validName}`,
+      subslopId: subslop.id,
+      name: `s/${validName}`,
       createdAt: ctx.timestamp,
     });
 
-    console.info(`Submolt "m/${validName}" created by agent ${agent.name}.`);
+    console.info(`Subslop "s/${validName}" created by agent ${agent.name}.`);
   },
 );
 
-export const subscribe_submolt = spacetimedb.reducer(
-  { submoltName: t.string() },
-  (ctx, { submoltName }) => {
+export const subscribe_subslop = spacetimedb.reducer(
+  { subslopName: t.string() },
+  (ctx, { subslopName }) => {
     const agent = requireAgent(ctx, ctx.sender);
-    const submolt = ctx.db.submolt.name.find(submoltName.trim().toLowerCase());
-    if (!submolt) {
-      throw new SenderError(`Submolt "${submoltName}" not found.`);
+    const subslop = ctx.db.subslop.name.find(subslopName.trim().toLowerCase());
+    if (!subslop) {
+      throw new SenderError(`Subslop "${subslopName}" not found.`);
     }
 
     // Check if already subscribed
-    for (const sub of ctx.db.submoltSubscription.sub_agent.filter(agent.id)) {
-      if (sub.submoltId === submolt.id) {
-        throw new SenderError('You are already subscribed to this submolt.');
+    for (const sub of ctx.db.subslopSubscription.sub_agent.filter(agent.id)) {
+      if (sub.subslopId === subslop.id) {
+        throw new SenderError('You are already subscribed to this subslop.');
       }
     }
 
-    ctx.db.submoltSubscription.insert({
+    ctx.db.subslopSubscription.insert({
       id: 0n,
       agentId: agent.id,
-      submoltId: submolt.id,
+      subslopId: subslop.id,
       createdAt: ctx.timestamp,
     });
 
     // Update subscriber count
-    const stats = ctx.db.submoltStats.submoltId.find(submolt.id);
+    const stats = ctx.db.subslopStats.subslopId.find(subslop.id);
     if (stats) {
-      ctx.db.submoltStats.submoltId.update({
+      ctx.db.subslopStats.subslopId.update({
         ...stats,
         subscriberCount: stats.subscriberCount + 1n,
       });
@@ -109,32 +109,32 @@ export const subscribe_submolt = spacetimedb.reducer(
   },
 );
 
-export const unsubscribe_submolt = spacetimedb.reducer(
-  { submoltName: t.string() },
-  (ctx, { submoltName }) => {
+export const unsubscribe_subslop = spacetimedb.reducer(
+  { subslopName: t.string() },
+  (ctx, { subslopName }) => {
     const agent = requireAgent(ctx, ctx.sender);
-    const submolt = ctx.db.submolt.name.find(submoltName.trim().toLowerCase());
-    if (!submolt) {
-      throw new SenderError(`Submolt "${submoltName}" not found.`);
+    const subslop = ctx.db.subslop.name.find(subslopName.trim().toLowerCase());
+    if (!subslop) {
+      throw new SenderError(`Subslop "${subslopName}" not found.`);
     }
 
     let found = false;
-    for (const sub of ctx.db.submoltSubscription.sub_agent.filter(agent.id)) {
-      if (sub.submoltId === submolt.id) {
-        ctx.db.submoltSubscription.id.delete(sub.id);
+    for (const sub of ctx.db.subslopSubscription.sub_agent.filter(agent.id)) {
+      if (sub.subslopId === subslop.id) {
+        ctx.db.subslopSubscription.id.delete(sub.id);
         found = true;
         break;
       }
     }
 
     if (!found) {
-      throw new SenderError('You are not subscribed to this submolt.');
+      throw new SenderError('You are not subscribed to this subslop.');
     }
 
     // Update subscriber count
-    const stats = ctx.db.submoltStats.submoltId.find(submolt.id);
+    const stats = ctx.db.subslopStats.subslopId.find(subslop.id);
     if (stats && stats.subscriberCount > 0n) {
-      ctx.db.submoltStats.submoltId.update({
+      ctx.db.subslopStats.subslopId.update({
         ...stats,
         subscriberCount: stats.subscriberCount - 1n,
       });
@@ -142,22 +142,22 @@ export const unsubscribe_submolt = spacetimedb.reducer(
   },
 );
 
-export const update_submolt = spacetimedb.reducer(
+export const update_subslop = spacetimedb.reducer(
   {
-    submoltName: t.string(),
+    subslopName: t.string(),
     displayName: t.string(),
     description: t.string(),
     bannerColor: t.string(),
     themeColor: t.string(),
   },
-  (ctx, { submoltName, displayName, description, bannerColor, themeColor }) => {
+  (ctx, { subslopName, displayName, description, bannerColor, themeColor }) => {
     const agent = requireAgent(ctx, ctx.sender);
-    const submolt = ctx.db.submolt.name.find(submoltName.trim().toLowerCase());
-    if (!submolt) {
-      throw new SenderError(`Submolt "${submoltName}" not found.`);
+    const subslop = ctx.db.subslop.name.find(subslopName.trim().toLowerCase());
+    if (!subslop) {
+      throw new SenderError(`Subslop "${subslopName}" not found.`);
     }
 
-    requireSubmoltOwnerInline(ctx, submolt.id, agent.id);
+    requireSubslopOwnerInline(ctx, subslop.id, agent.id);
 
     const validDisplayName = requireNonEmpty(displayName, 'Display name');
     requireMaxLength(validDisplayName, 100, 'Display name');
@@ -165,8 +165,8 @@ export const update_submolt = spacetimedb.reducer(
     const validBannerColor = validateColor(bannerColor, 'Banner color');
     const validThemeColor = validateColor(themeColor, 'Theme color');
 
-    ctx.db.submolt.id.update({
-      ...submolt,
+    ctx.db.subslop.id.update({
+      ...subslop,
       displayName: validDisplayName,
       description,
       bannerColor: validBannerColor,
@@ -176,15 +176,15 @@ export const update_submolt = spacetimedb.reducer(
 );
 
 /** Inline helper to avoid circular dependency with auth.ts */
-function requireSubmoltOwnerInline(ctx: { db: any }, submoltId: bigint, agentId: bigint): void {
+function requireSubslopOwnerInline(ctx: { db: any }, subslopId: bigint, agentId: bigint): void {
   let found = false;
-  for (const mod of ctx.db.submoltModerator.mod_submolt.filter(submoltId)) {
+  for (const mod of ctx.db.subslopModerator.mod_subslop.filter(subslopId)) {
     if (mod.agentId === agentId && mod.role.tag === 'owner') {
       found = true;
       break;
     }
   }
   if (!found) {
-    throw new SenderError('You are not the owner of this submolt.');
+    throw new SenderError('You are not the owner of this subslop.');
   }
 }

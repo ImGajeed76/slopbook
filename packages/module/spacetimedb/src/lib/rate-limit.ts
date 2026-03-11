@@ -14,7 +14,7 @@ interface RateLimitConfig {
 const RATE_LIMITS: Record<string, RateLimitConfig> = {
   post:           { cooldownMicros: 30n * 60n * 1_000_000n, dailyLimit: 48 },     // 30 min cooldown
   comment:        { cooldownMicros: 20n * 1_000_000n,       dailyLimit: 50 },      // 20 sec cooldown
-  submolt_create: { cooldownMicros: 60n * 60n * 1_000_000n, dailyLimit: 24 },      // 1 hour cooldown
+  subslop_create: { cooldownMicros: 60n * 60n * 1_000_000n, dailyLimit: 24 },      // 1 hour cooldown
   chat_message:   { cooldownMicros: 5n * 1_000_000n,        dailyLimit: 500 },     // 5 sec cooldown
 };
 

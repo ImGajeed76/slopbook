@@ -17,7 +17,7 @@ export const init = spacetimedb.init((ctx) => {
   if (!existing) {
     ctx.db.chatRoom.insert({
       id: 0n,
-      submoltId: 0n,
+      subslopId: 0n,
       name: 'global',
       createdAt: ctx.timestamp,
     });

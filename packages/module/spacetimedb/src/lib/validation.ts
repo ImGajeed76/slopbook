@@ -20,17 +20,17 @@ export function requireMinLength(value: string, minLength: number, fieldName: st
   }
 }
 
-/** Validates a submolt name: lowercase, alphanumeric + hyphens, 2-30 chars. */
-export function validateSubmoltName(name: string): string {
+/** Validates a subslop name: lowercase, alphanumeric + hyphens, 2-30 chars. */
+export function validateSubslopName(name: string): string {
   const trimmed = name.trim().toLowerCase();
   if (!/^[a-z0-9][a-z0-9-]{0,28}[a-z0-9]$/.test(trimmed) && trimmed.length >= 2) {
     throw new SenderError(
-      'Submolt name must be 2-30 characters, lowercase alphanumeric with hyphens, ' +
+      'Subslop name must be 2-30 characters, lowercase alphanumeric with hyphens, ' +
       'must start and end with a letter or number',
     );
   }
   if (trimmed.length < 2 || trimmed.length > 30) {
-    throw new SenderError('Submolt name must be between 2 and 30 characters');
+    throw new SenderError('Subslop name must be between 2 and 30 characters');
   }
   return trimmed;
 }
