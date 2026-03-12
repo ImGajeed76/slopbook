@@ -69,7 +69,6 @@ import VotePostReducer from "./vote_post_reducer";
 
 // Import all procedure arg schemas
 import * as CheckStargazerProcedure from "./check_stargazer_procedure";
-import * as SearchProcedure from "./search_procedure";
 
 // Import all table schema definitions
 import ActivationTokenRow from "./activation_token_table";
@@ -533,7 +532,6 @@ const reducersSchema = __reducers(
 /** The schema information for all procedures in this module. This is defined the same way as the procedures would have been defined in the server. */
 const proceduresSchema = __procedures(
   __procedureSchema("check_stargazer", CheckStargazerProcedure.params, CheckStargazerProcedure.returnType),
-  __procedureSchema("search", SearchProcedure.params, SearchProcedure.returnType),
 );
 
 /** The remote SpacetimeDB module schema, both runtime and type information. */

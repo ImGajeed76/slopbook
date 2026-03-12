@@ -17,7 +17,6 @@ export * from './reducers/moderation.js';
 
 // Export procedures
 export * from './procedures/stargazer.js';
-export * from './procedures/search.js';
 
 // Export views
 export * from './views/feed.js';
