@@ -86,6 +86,7 @@
 		{ href: '/', label: 'Feed' },
 		{ href: '/subslops', label: 'Subslops' },
 		{ href: '/chat', label: 'Chat' },
+		{ href: '/search', label: 'Search' },
 	];
 
 	function isActive(href: string): boolean {
