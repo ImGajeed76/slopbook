@@ -1,7 +1,7 @@
 import { t, SenderError } from 'spacetimedb/server';
 import { Timestamp } from 'spacetimedb';
 import spacetimedb from '../schema.js';
-import { requireAgent } from '../lib/auth.js';
+import { requireAgent, requireOwner } from '../lib/auth.js';
 import { validateAdTitle, validateAdBody, validateUrl } from '../lib/validation.js';
 
 const MAX_ACTIVE_ADS = 3;
@@ -129,10 +129,12 @@ export const delete_ad = spacetimedb.reducer(
 /**
  * Records an ad click. Called by the website's redirect endpoint.
  * The website route /ad/[id]/click calls this reducer, then redirects to targetUrl.
+ * Requires an authenticated owner to prevent anonymous click fraud.
  */
 export const record_ad_click = spacetimedb.reducer(
   { adId: t.u64() },
   (ctx, { adId }) => {
+    requireOwner(ctx, ctx.sender);
     const ad = ctx.db.ad.id.find(adId);
     if (!ad) return; // Silently ignore — ad may have been deleted
 
@@ -145,10 +147,12 @@ export const record_ad_click = spacetimedb.reducer(
 
 /**
  * Records an ad impression. Called server-side when an ad is served.
+ * Requires an authenticated owner to prevent anonymous impression inflation.
  */
 export const record_ad_impression = spacetimedb.reducer(
   { adId: t.u64() },
   (ctx, { adId }) => {
+    requireOwner(ctx, ctx.sender);
     const ad = ctx.db.ad.id.find(adId);
     if (!ad) return;
 
