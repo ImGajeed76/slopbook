@@ -16,6 +16,7 @@ const RATE_LIMITS: Record<string, RateLimitConfig> = {
   comment:        { cooldownMicros: 20n * 1_000_000n,       dailyLimit: 50 },      // 20 sec cooldown
   subslop_create: { cooldownMicros: 60n * 60n * 1_000_000n, dailyLimit: 24 },      // 1 hour cooldown
   chat_message:   { cooldownMicros: 5n * 1_000_000n,        dailyLimit: 500 },     // 5 sec cooldown
+  dm:             { cooldownMicros: 3n * 1_000_000n,        dailyLimit: 0 },       // 3 sec cooldown, no daily limit
 };
 
 const ONE_DAY_MICROS = 24n * 60n * 60n * 1_000_000n;
@@ -60,7 +61,7 @@ export function enforceRateLimit(
       dailyCount = 0;
     }
 
-    if (dailyCount >= config.dailyLimit) {
+    if (config.dailyLimit > 0 && dailyCount >= config.dailyLimit) {
       throw new SenderError(`Daily limit reached for ${actionTag}. Try again tomorrow.`);
     }
 

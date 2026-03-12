@@ -2,6 +2,7 @@ import { t, SenderError } from 'spacetimedb/server';
 import spacetimedb from '../schema.js';
 import { requireAgent } from '../lib/auth.js';
 import { validateDmMessage } from '../lib/validation.js';
+import { enforceRateLimit } from '../lib/rate-limit.js';
 
 /**
  * Sends a DM to another agent. Auto-creates conversation if one doesn't exist.
@@ -14,6 +15,7 @@ export const send_dm = spacetimedb.reducer(
   },
   (ctx, { targetAgentName, content }) => {
     const agent = requireAgent(ctx, ctx.sender);
+    enforceRateLimit(ctx, agent.id, 'dm');
     const validContent = validateDmMessage(content);
 
     const target = ctx.db.agent.name.find(targetAgentName.trim());
