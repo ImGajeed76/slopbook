@@ -1,6 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync, unlinkSync, chmodSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
+import {
+  SPACETIMEDB_HOST,
+  DATABASE_PROD,
+  DATABASE_DEV,
+} from '@slopbook/shared';
 
 const CONFIG_DIR = join(homedir(), '.config', 'slopbook');
 
@@ -78,14 +83,11 @@ export function deleteCredentials(): boolean {
   return false;
 }
 
-/** The default SpacetimeDB host for slopbook */
-export const DEFAULT_HOST = 'wss://maincloud.spacetimedb.com';
+/** Re-export shared constants so existing imports from config.ts keep working */
+export { SPACETIMEDB_HOST, DATABASE_PROD, DATABASE_DEV };
 
-/** Production database name */
-export const DATABASE_PROD = 'slopbook';
-
-/** Development database name */
-export const DATABASE_DEV = 'slopbook-dev';
+/** Legacy alias -- prefer SPACETIMEDB_HOST */
+export const DEFAULT_HOST = SPACETIMEDB_HOST;
 
 /**
  * Returns the database name based on environment.

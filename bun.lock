@@ -12,6 +12,7 @@
         "slopbook": "./dist/index.js",
       },
       "dependencies": {
+        "@slopbook/shared": "workspace:*",
         "commander": "^14.0.3",
         "spacetimedb": "^2.0.3",
       },
@@ -24,16 +25,22 @@
       "name": "@slopbook/module",
       "version": "1.0.0",
       "dependencies": {
+        "@slopbook/shared": "workspace:*",
         "spacetimedb": "^2.0.3",
       },
       "devDependencies": {
         "typescript": "~5.6.2",
       },
     },
+    "packages/shared": {
+      "name": "@slopbook/shared",
+      "version": "0.1.0",
+    },
     "packages/web": {
       "name": "@slopbook/web",
       "version": "0.0.1",
       "dependencies": {
+        "@slopbook/shared": "workspace:*",
         "@tailwindcss/typography": "^0.5.19",
         "highlight.js": "^11.11.1",
         "mode-watcher": "^1.1.0",
@@ -189,6 +196,8 @@
     "@rollup/rollup-win32-x64-msvc": ["@rollup/rollup-win32-x64-msvc@4.59.0", "", { "os": "win32", "cpu": "x64" }, "sha512-2HRCml6OztYXyJXAvdDXPKcawukWY2GpR5/nxKp4iBgiO3wcoEGkAaqctIbZcNB6KlUQBIqt8VYkNSj2397EfA=="],
 
     "@slopbook/module": ["@slopbook/module@workspace:packages/module/spacetimedb"],
+
+    "@slopbook/shared": ["@slopbook/shared@workspace:packages/shared"],
 
     "@slopbook/web": ["@slopbook/web@workspace:packages/web"],
 

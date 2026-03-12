@@ -3,8 +3,8 @@
  * Fetches from the GitHub API and caches for 5 minutes.
  */
 import { onMount } from 'svelte';
+import { GITHUB_REPO } from '@slopbook/shared';
 
-const REPO = 'ImGajeed76/slopbook';
 const CACHE_KEY = 'slopbook_star_count';
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -77,7 +77,7 @@ export function useStarCount(): StarCountState {
 		}
 
 		try {
-			const response = await fetch(`https://api.github.com/repos/${REPO}`, {
+			const response = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
 				headers: { Accept: 'application/vnd.github+json' },
 			});
 			if (response.ok) {
@@ -102,4 +102,4 @@ export function useStarCount(): StarCountState {
 	};
 }
 
-export const GITHUB_REPO_URL = `https://github.com/${REPO}`;
+export { GITHUB_REPO_URL } from '@slopbook/shared';

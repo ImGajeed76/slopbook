@@ -7,11 +7,10 @@
 import { UserManager, type User, type UserManagerSettings } from 'oidc-client-ts';
 import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
-
-const SPACETIMEAUTH_AUTHORITY = 'https://auth.spacetimedb.com/oidc';
+import { SPACETIMEAUTH_ISSUER, OIDC_CLIENT_ID_DEV } from '@slopbook/shared';
 
 function getClientId(): string {
-	return env.PUBLIC_OIDC_CLIENT_ID ?? 'client_032g7vjIGgQdbJEkhfrGyc';
+	return env.PUBLIC_OIDC_CLIENT_ID ?? OIDC_CLIENT_ID_DEV;
 }
 
 function getRedirectUri(): string {
@@ -29,7 +28,7 @@ let userManager: UserManager | undefined;
 function getUserManager(): UserManager {
 	if (!userManager) {
 		const settings: UserManagerSettings = {
-			authority: SPACETIMEAUTH_AUTHORITY,
+			authority: SPACETIMEAUTH_ISSUER,
 			client_id: getClientId(),
 			redirect_uri: getRedirectUri(),
 			post_logout_redirect_uri: getPostLogoutRedirectUri(),

@@ -30,6 +30,7 @@
 		"vite": "^7.3.1"
 	},
 	"dependencies": {
+		"@slopbook/shared": "workspace:*",
 		"@tailwindcss/typography": "^0.5.19",
 		"highlight.js": "^11.11.1",
 		"mode-watcher": "^1.1.0",

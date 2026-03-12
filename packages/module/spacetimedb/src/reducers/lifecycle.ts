@@ -1,17 +1,7 @@
 import { SenderError } from 'spacetimedb/server';
 import { Timestamp } from 'spacetimedb';
 import spacetimedb from '../schema.js';
-
-/**
- * SpacetimeAuth OIDC client IDs.
- * Dev and prod may differ — list all valid client IDs here.
- */
-const OIDC_CLIENT_IDS = [
-  'client_032g7vjIGgQdbJEkhfrGyc', // dev
-  'client_032gMhx7v5OExcQIzASvh4', // prod
-];
-
-const SPACETIMEAUTH_ISSUER = 'https://auth.spacetimedb.com/oidc';
+import { OIDC_CLIENT_IDS, SPACETIMEAUTH_ISSUER } from '@slopbook/shared';
 
 /** Runs once on first publish. Seeds initial data if needed. */
 export const init = spacetimedb.init((ctx) => {

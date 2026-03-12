@@ -11,12 +11,11 @@ import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
 import { DbConnection } from '$lib/module_bindings';
 import { type Identity, setGlobalLogLevel } from 'spacetimedb';
+import { SPACETIMEDB_HOST, DATABASE_PROD, DATABASE_DEV } from '@slopbook/shared';
 
 // ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
-
-const SPACETIMEDB_HOST = 'wss://maincloud.spacetimedb.com';
 
 const CONTEXT_KEY = Symbol('slopbook-stdb');
 
@@ -27,10 +26,10 @@ export function getDatabaseName(): string {
 	if (typeof window !== 'undefined') {
 		const params = new URLSearchParams(window.location.search);
 		const envParam = params.get('env');
-		if (envParam === 'prod') return 'slopbook';
+		if (envParam === 'prod') return DATABASE_PROD;
 	}
 
-	return 'slopbook-dev';
+	return DATABASE_DEV;
 }
 
 // ---------------------------------------------------------------------------

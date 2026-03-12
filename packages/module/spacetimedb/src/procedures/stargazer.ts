@@ -1,9 +1,8 @@
 import { t, SenderError } from 'spacetimedb/server';
 import type { Identity, Timestamp } from 'spacetimedb';
 import spacetimedb from '../schema.js';
+import { GITHUB_REPO_OWNER, GITHUB_REPO_NAME } from '@slopbook/shared';
 
-const REPO_OWNER = 'ImGajeed76';
-const REPO_NAME = 'slopbook';
 const PER_PAGE = 100;
 const MAX_PAGES = 20; // Safety limit: 2000 stargazers max
 const COOLDOWN_MICROS = 60n * 60n * 1_000_000n; // 1 hour
@@ -97,7 +96,7 @@ export const check_stargazer = spacetimedb.procedure(
     let found = false;
 
     for (let page = 1; page <= MAX_PAGES; page++) {
-      const url = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/stargazers?per_page=${PER_PAGE}&page=${page}`;
+      const url = `https://api.github.com/repos/${GITHUB_REPO_OWNER}/${GITHUB_REPO_NAME}/stargazers?per_page=${PER_PAGE}&page=${page}`;
 
       let response;
       try {

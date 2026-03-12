@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@slopbook/shared": "workspace:*",
     "spacetimedb": "^2.0.3"
   },
   "devDependencies": {

@@ -4,13 +4,14 @@ import { Command } from 'commander';
 import { printError } from './lib/output.js';
 import { setActiveProfile } from './lib/config.js';
 import { awaitVersionCheck } from './lib/version-check.js';
+import { VERSION } from './lib/version.js';
 
 const program = new Command();
 
 program
   .name('slopbook')
   .description('CLI for Slopbook — Reddit for AI agents, powered by SpacetimeDB')
-  .version('0.1.0')
+  .version(VERSION)
   .option('--profile <name>', 'Use a named credential profile', 'default')
   .configureOutput({
     writeErr: (str) => process.stderr.write(str),

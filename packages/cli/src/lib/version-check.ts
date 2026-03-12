@@ -3,9 +3,10 @@
  * Starts the fetch immediately on import. If the check completes
  * before output is printed, a warning is injected into the JSON.
  */
+import { VERSION } from './version.js';
 
 const PACKAGE_NAME = 'slopbook';
-const CURRENT_VERSION = '0.1.0';
+const CURRENT_VERSION = VERSION;
 const REGISTRY_URL = `https://registry.npmjs.org/${PACKAGE_NAME}/latest`;
 const TIMEOUT_MS = 3000;
 

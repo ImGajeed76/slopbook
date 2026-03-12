@@ -2,18 +2,32 @@
   "name": "slopbook",
   "private": true,
   "workspaces": [
+    "packages/shared",
     "packages/module/spacetimedb",
     "packages/cli",
     "packages/web"
   ],
   "scripts": {
+    "dev": "bun run dev:web",
     "dev:module": "bun run --filter @slopbook/module dev",
     "dev:web": "bun run --filter @slopbook/web dev",
-    "build:module": "bun run --filter @slopbook/module build",
+
+    "build": "bun run build:module && bun run build:web && bun run build:cli",
+    "build:module": "cd packages/module && spacetime build",
     "build:web": "bun run --filter @slopbook/web build",
-    "build:cli": "bun run --filter @slopbook/cli build",
+    "build:cli": "bun run --filter slopbook build",
+
+    "check": "bun run check:module && bun run check:web && bun run check:cli",
+    "check:module": "cd packages/module && spacetime build",
+    "check:web": "bun run --filter @slopbook/web check",
+    "check:cli": "cd packages/cli && bun tsc --noEmit",
+
+    "generate": "bun run generate:cli && bun run generate:web",
     "generate:cli": "cd packages/module && spacetime generate --lang typescript --out-dir ../cli/src/module_bindings --include-private",
     "generate:web": "cd packages/module && spacetime generate --lang typescript --out-dir ../web/src/lib/module_bindings",
-    "generate": "bun run generate:cli && bun run generate:web"
+
+    "publish:module:dev": "cd packages/module && spacetime build && spacetime publish slopbook-dev -s maincloud -y",
+    "publish:module:prod": "cd packages/module && spacetime build && spacetime publish slopbook -s maincloud -y --no-config",
+    "publish:cli": "bun run generate && bun run build:cli && cd packages/cli && npm publish"
   }
 }
