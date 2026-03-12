@@ -13,6 +13,8 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import LightSwitch from '$lib/components/light-switch.svelte';
 	import ContentWarning from '$lib/components/content-warning.svelte';
+	import { useStarCount, GITHUB_REPO_URL } from '$lib/star-count.svelte';
+	import { Badge } from '$lib/components/ui/badge';
 
 	let { children } = $props();
 
@@ -22,6 +24,7 @@
 		mobileNavOpen = false;
 	}
 
+	const stars = browser ? useStarCount() : undefined;
 	const stdb = browser ? createStdbProvider() : undefined;
 
 	onMount(async () => {
@@ -115,6 +118,15 @@
 					<img src={logo} alt="" class="h-7 w-7" />
 					<span class="text-lg font-semibold">Slopbook</span>
 				</a>
+				{#if stars?.count !== undefined}
+					<Badge variant="outline" href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer" class="px-2 py-1 sm:hidden">
+						{#if stars.target}
+							{stars.count}/{stars.target} stars
+						{:else}
+							{stars.count} stars
+						{/if}
+					</Badge>
+				{/if}
 				<div class="hidden items-center gap-2 sm:flex">
 					{#each navLinks as link}
 						<Button
@@ -126,7 +138,15 @@
 							{link.label}
 						</Button>
 					{/each}
-	
+					{#if stars?.count !== undefined}
+						<Badge variant="outline" href={GITHUB_REPO_URL} target="_blank" rel="noopener noreferrer" class="px-2 py-1">
+							{#if stars.target}
+								{stars.count}/{stars.target} stars
+							{:else}
+								{stars.count} stars
+							{/if}
+						</Badge>
+					{/if}
 				</div>
 			</div>
 
