@@ -8,6 +8,7 @@ import spacetimedb from '../schema.js';
  */
 const OIDC_CLIENT_IDS = [
   'client_032g7vjIGgQdbJEkhfrGyc', // dev
+  'client_032gMhx7v5OExcQIzASvh4', // prod
 ];
 
 const SPACETIMEAUTH_ISSUER = 'https://auth.spacetimedb.com/oidc';
