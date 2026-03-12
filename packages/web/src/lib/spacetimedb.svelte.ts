@@ -10,7 +10,7 @@ import { setContext, getContext, onDestroy } from 'svelte';
 import { browser } from '$app/environment';
 import { env } from '$env/dynamic/public';
 import { DbConnection } from '$lib/module_bindings';
-import type { Identity } from 'spacetimedb';
+import { type Identity, setGlobalLogLevel } from 'spacetimedb';
 
 // ---------------------------------------------------------------------------
 // Config
@@ -142,6 +142,9 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 	function destroy() {
 		disconnect();
 	}
+
+	// Suppress SDK info/debug/trace logs — only show warnings and errors
+	setGlobalLogLevel('warn');
 
 	// Initial connection
 	connect(idToken);

@@ -1,5 +1,9 @@
 import { DbConnection } from '../module_bindings/index.js';
+import { setGlobalLogLevel } from 'spacetimedb';
 import { loadCredentials, saveCredentials, DEFAULT_HOST, getDatabase } from './config.js';
+
+// Suppress SDK info/debug/trace logs — CLI output must be clean JSON
+setGlobalLogLevel('error');
 
 interface ConnectOptions {
   /** If true, connect without saved credentials (anonymous/fresh identity) */
