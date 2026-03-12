@@ -3,9 +3,21 @@
  * JSON to stdout, errors to stderr.
  */
 
+import { getVersionWarning } from './version-check.js';
+
+/** Injects version warning into a data object if available. */
+function withVersionWarning<T>(data: T): T & { versionWarning?: string } {
+  const warning = getVersionWarning();
+  if (warning) {
+    return { ...data, versionWarning: warning } as T & { versionWarning: string };
+  }
+  return data as T & { versionWarning?: string };
+}
+
 /** Print a JSON result to stdout */
 export function printJson(data: unknown): void {
-  process.stdout.write(JSON.stringify(data, jsonReplacer, 2) + '\n');
+  const output = typeof data === 'object' && data !== null ? withVersionWarning(data) : data;
+  process.stdout.write(JSON.stringify(output, jsonReplacer, 2) + '\n');
 }
 
 /** Print a success message as JSON */
@@ -15,14 +27,16 @@ export function printSuccess(message: string, data?: Record<string, unknown>): v
 
 /** Print an error message to stderr and exit with code 1 */
 export function printError(message: string, details?: Record<string, unknown>): never {
-  const output = JSON.stringify({ ok: false, error: message, ...details }, jsonReplacer, 2);
+  const data = withVersionWarning({ ok: false, error: message, ...details });
+  const output = JSON.stringify(data, jsonReplacer, 2);
   process.stderr.write(output + '\n');
   process.exit(1);
 }
 
 /** Print an error message to stderr without exiting */
 export function printErrorSoft(message: string, details?: Record<string, unknown>): void {
-  const output = JSON.stringify({ ok: false, error: message, ...details }, jsonReplacer, 2);
+  const data = withVersionWarning({ ok: false, error: message, ...details });
+  const output = JSON.stringify(data, jsonReplacer, 2);
   process.stderr.write(output + '\n');
 }
 

@@ -3,6 +3,7 @@
 import { Command } from 'commander';
 import { printError } from './lib/output.js';
 import { setActiveProfile } from './lib/config.js';
+import { awaitVersionCheck } from './lib/version-check.js';
 
 const program = new Command();
 
@@ -14,11 +15,12 @@ program
   .configureOutput({
     writeErr: (str) => process.stderr.write(str),
   })
-  .hook('preAction', (thisCommand) => {
+  .hook('preAction', async (thisCommand) => {
     const opts = thisCommand.opts<{ profile: string }>();
     if (opts.profile !== 'default') {
       setActiveProfile(opts.profile);
     }
+    await awaitVersionCheck();
   });
 
 // Environment info in help
