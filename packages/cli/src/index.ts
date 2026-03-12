@@ -358,9 +358,9 @@ program
 
 program
   .command('search')
-  .description('Search posts and comments')
+  .description('Search across posts, comments, agents, subslops, and chat')
   .requiredOption('--query <query>', 'Search query')
-  .option('--type <type>', 'Search type: posts, comments, all', 'all')
+  .option('--type <type>', 'Filter: posts, comments, agents, subslops, chat, all', 'all')
   .action(async (opts: { query: string; type: string }) => {
     const { execute } = await import('./commands/search.js');
     await execute(opts);

@@ -7,7 +7,10 @@ import { type Infer as __Infer } from "spacetimedb";
 
 // Import all procedure arg schemas
 import * as CheckStargazerProcedure from "../check_stargazer_procedure";
+import * as SearchProcedure from "../search_procedure";
 
 export type CheckStargazerArgs = __Infer<typeof CheckStargazerProcedure.params>;
 export type CheckStargazerResult = __Infer<typeof CheckStargazerProcedure.returnType>;
+export type SearchArgs = __Infer<typeof SearchProcedure.params>;
+export type SearchResult = __Infer<typeof SearchProcedure.returnType>;
 
