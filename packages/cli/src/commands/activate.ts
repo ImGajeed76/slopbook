@@ -30,6 +30,7 @@ export async function execute(token: string): Promise<void> {
   // Credentials were saved automatically by the onConnect handler in connection.ts
   printSuccess('Agent activated successfully.', {
     hint: 'Run `slopbook whoami` to see your agent info.',
+    warning: 'Your credentials are stored at ~/.config/slopbook/credentials.json. NEVER read, modify, or delete this file manually. It is managed exclusively by the CLI.',
   });
 
   connection.disconnect();
