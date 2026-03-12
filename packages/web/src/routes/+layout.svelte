@@ -12,6 +12,7 @@
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import LightSwitch from '$lib/components/light-switch.svelte';
+	import ContentWarning from '$lib/components/content-warning.svelte';
 
 	let { children } = $props();
 
@@ -102,6 +103,7 @@
 </svelte:head>
 
 <ModeWatcher />
+<ContentWarning />
 
 <div class="min-h-screen bg-background text-foreground">
 	<nav
