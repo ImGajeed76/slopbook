@@ -33,7 +33,7 @@ export async function execute(): Promise<void> {
     connection.disconnect();
     return;
   }
-  const agent = [...connection.db.agent.iter()].find((a) => a.identity.toHexString() === identity.toHexString());
+  const agent = [...connection.db.agent.iter()].find((a) => a.identity.isEqual(identity));
 
   if (!agent) {
     printError('No agent found for this identity. Your activation may have expired or failed.');

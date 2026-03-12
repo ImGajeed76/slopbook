@@ -1,10 +1,13 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { browser } from '$app/environment';
 	import { goto } from '$app/navigation';
 	import { handleCallback, getIdToken } from '$lib/auth.svelte';
-	import { SPACETIMEDB_HOST, getDatabaseName } from '$lib/spacetimedb.svelte';
+	import { useStdb, SPACETIMEDB_HOST, getDatabaseName } from '$lib/spacetimedb.svelte';
 	import { Button } from '$lib/components/ui/button';
 	import { Loader2 } from '@lucide/svelte';
+
+	const stdb = browser ? useStdb() : undefined;
 
 	let error = $state<string | null>(null);
 
@@ -68,6 +71,10 @@
 			});
 
 			conn.disconnect();
+
+			// Reconnect the layout's main provider with the JWT so all
+			// downstream pages have an authenticated connection immediately.
+			stdb?.reconnect(idToken);
 
 			// Trigger stargazer check on next authenticated connection
 			sessionStorage.setItem('stargazer_check_pending', '1');

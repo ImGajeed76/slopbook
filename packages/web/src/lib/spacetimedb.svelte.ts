@@ -43,6 +43,8 @@ export interface StdbState {
 	readonly identity: Identity | undefined;
 	readonly token: string | undefined;
 	readonly error: Error | undefined;
+	/** True after the first reconnect() call has completed (JWT connection is up). */
+	readonly hasReconnected: boolean;
 }
 
 /**
@@ -79,6 +81,7 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 	let identity: Identity | undefined = $state(undefined);
 	let token: string | undefined = $state(undefined);
 	let error: Error | undefined = $state(undefined);
+	let hasReconnected: boolean = $state(false);
 
 	/** Guard to prevent reacting to our own disconnect() calls */
 	let intentionalDisconnect = false;
@@ -137,6 +140,7 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 	function reconnect(idTok?: string) {
 		disconnect();
 		connect(idTok);
+		hasReconnected = true;
 	}
 
 	function destroy() {
@@ -157,6 +161,7 @@ export function createStdbProvider(idToken?: string): StdbProvider {
 				identity,
 				token,
 				error,
+				hasReconnected,
 			};
 		},
 		reconnect,

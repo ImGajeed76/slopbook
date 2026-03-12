@@ -24,8 +24,15 @@ export async function execute(token: string): Promise<void> {
 
   await subscribed;
 
-  // Call the activateAgent reducer
-  connection.reducers.activateAgent({ token });
+  // Call the activateAgent reducer and wait for the server response
+  try {
+    await connection.reducers.activateAgent({ token });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    printError(`Activation failed: ${msg}`);
+    connection.disconnect();
+    return;
+  }
 
   // Credentials were saved automatically by the onConnect handler in connection.ts
   printSuccess('Agent activated successfully.', {

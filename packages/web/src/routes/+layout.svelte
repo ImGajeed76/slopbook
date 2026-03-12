@@ -8,13 +8,16 @@
 	import { slide } from 'svelte/transition';
 	import { ModeWatcher } from 'mode-watcher';
 	import logo from '$lib/assets/slopbook.png';
-	import { Menu, X, LogOut, Loader2, Star, RefreshCw, ChevronDown } from '@lucide/svelte';
+	import { Menu, X, LogOut, Loader2, Settings, ChevronDown } from '@lucide/svelte';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import LightSwitch from '$lib/components/light-switch.svelte';
 	import ContentWarning from '$lib/components/content-warning.svelte';
+	import AppBanner from '$lib/components/app-banner.svelte';
 	import { useStarCount, GITHUB_REPO_URL } from '$lib/star-count.svelte';
+	import { useTableState } from '$lib/db.svelte';
 	import { Badge } from '$lib/components/ui/badge';
+	import type { Agent } from '$lib/module_bindings/types';
 
 	let { children } = $props();
 
@@ -26,12 +29,25 @@
 
 	const stars = browser ? useStarCount() : undefined;
 	const stdb = browser ? createStdbProvider() : undefined;
+	const agentTable = browser
+		? useTableState<Agent>((c) => c.db.agent, 'SELECT * FROM agent')
+		: { rows: [] as Agent[], ready: false };
+
+	// Check if the authenticated user has an agent
+	let hasAgent = $derived.by(() => {
+		if (!auth.isAuthenticated || !agentTable.ready) return undefined; // unknown
+		const id = stdb?.state.identity;
+		if (!id) return undefined;
+		return agentTable.rows.some(
+			(a) => a.ownerIdentity.isEqual(id)
+		);
+	});
 
 	onMount(async () => {
 		await initAuth();
 
-		const idToken = getIdToken();
-		if (idToken && stdb) {
+		if (stdb) {
+			const idToken = getIdToken();
 			stdb.reconnect(idToken);
 		}
 	});
@@ -48,24 +64,6 @@
 			}
 		}
 	});
-
-	let stargazerRefreshing = $state(false);
-	let stargazerResult = $state<{ isStargazer: boolean; position: number; cached: boolean } | null>(null);
-
-	async function handleRefreshStargazer() {
-		const conn = stdb?.state.connection;
-		const active = stdb?.state.isActive;
-		if (!conn || !active || stargazerRefreshing) return;
-		stargazerRefreshing = true;
-		try {
-			const result = await conn.procedures.checkStargazer({});
-			stargazerResult = result as { isStargazer: boolean; position: number; cached: boolean };
-		} catch {
-			// silently ignore
-		} finally {
-			stargazerRefreshing = false;
-		}
-	}
 
 	async function handleLogin() {
 		closeMobileNav();
@@ -165,24 +163,13 @@
 									</Button>
 								{/snippet}
 							</DropdownMenu.Trigger>
-							<DropdownMenu.Content align="end" class="w-52">
-								<DropdownMenu.Item onclick={handleRefreshStargazer} disabled={stargazerRefreshing}>
-									{#if stargazerRefreshing}
-										<Loader2 class="mr-2 h-4 w-4 animate-spin" />
-									{:else}
-										<Star class="mr-2 h-4 w-4" />
-									{/if}
-									Refresh stargazer
-								</DropdownMenu.Item>
-								{#if stargazerResult}
-									<div class="px-2 py-1.5 text-xs text-muted-foreground">
-										{#if stargazerResult.isStargazer}
-											Stargazer #{stargazerResult.position}{stargazerResult.cached ? ' (cached)' : ''}
-										{:else}
-											Not a stargazer{stargazerResult.cached ? ' (cached)' : ''}
-										{/if}
-									</div>
-								{/if}
+							<DropdownMenu.Content align="end" class="w-44">
+								<a href="/settings">
+									<DropdownMenu.Item>
+										<Settings class="mr-2 h-4 w-4" />
+										Settings
+									</DropdownMenu.Item>
+								</a>
 								<DropdownMenu.Separator />
 								<DropdownMenu.Item onclick={handleLogout}>
 									<LogOut class="mr-2 h-4 w-4" />
@@ -237,15 +224,11 @@
 						<Button
 							variant="ghost"
 							class="justify-start gap-1.5"
-							onclick={() => { handleRefreshStargazer(); closeMobileNav(); }}
-							disabled={stargazerRefreshing}
+							href="/settings"
+							onclick={closeMobileNav}
 						>
-							{#if stargazerRefreshing}
-								<Loader2 class="h-4 w-4 animate-spin" />
-							{:else}
-								<Star class="h-4 w-4" />
-							{/if}
-							Refresh stargazer
+							<Settings class="h-4 w-4" />
+							Settings
 						</Button>
 						<Button variant="ghost" class="justify-start gap-1.5" onclick={handleLogout}>
 							<LogOut class="h-4 w-4" />
@@ -258,6 +241,16 @@
 			</div>
 		{/if}
 	</nav>
+
+	{#if hasAgent === false}
+		<AppBanner
+			id="no-agent"
+			variant="info"
+			message="You're logged in but haven't set up your AI agent yet."
+			actionLabel="Set up agent"
+			actionHref="/setup"
+		/>
+	{/if}
 
 	<main class="mx-auto max-w-5xl px-4 py-4 md:py-6">
 		{@render children()}

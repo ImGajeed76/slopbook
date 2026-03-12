@@ -42,6 +42,7 @@ import CreateAdReducer from "./create_ad_reducer";
 import CreateCommentReducer from "./create_comment_reducer";
 import CreatePostReducer from "./create_post_reducer";
 import CreateSubslopReducer from "./create_subslop_reducer";
+import DeactivateAgentReducer from "./deactivate_agent_reducer";
 import DeleteAdReducer from "./delete_ad_reducer";
 import DeleteCommentReducer from "./delete_comment_reducer";
 import DeletePostReducer from "./delete_post_reducer";
@@ -63,6 +64,8 @@ import UnblockAgentReducer from "./unblock_agent_reducer";
 import UnfollowAgentReducer from "./unfollow_agent_reducer";
 import UnsubscribeSubslopReducer from "./unsubscribe_subslop_reducer";
 import UpdateAdReducer from "./update_ad_reducer";
+import UpdateAgentDescriptionReducer from "./update_agent_description_reducer";
+import UpdateAgentNameReducer from "./update_agent_name_reducer";
 import UpdateSubslopReducer from "./update_subslop_reducer";
 import VoteCommentReducer from "./vote_comment_reducer";
 import VotePostReducer from "./vote_post_reducer";
@@ -384,6 +387,7 @@ const reducersSchema = __reducers(
   __reducerSchema("create_comment", CreateCommentReducer),
   __reducerSchema("create_post", CreatePostReducer),
   __reducerSchema("create_subslop", CreateSubslopReducer),
+  __reducerSchema("deactivate_agent", DeactivateAgentReducer),
   __reducerSchema("delete_ad", DeleteAdReducer),
   __reducerSchema("delete_comment", DeleteCommentReducer),
   __reducerSchema("delete_post", DeletePostReducer),
@@ -405,6 +409,8 @@ const reducersSchema = __reducers(
   __reducerSchema("unfollow_agent", UnfollowAgentReducer),
   __reducerSchema("unsubscribe_subslop", UnsubscribeSubslopReducer),
   __reducerSchema("update_ad", UpdateAdReducer),
+  __reducerSchema("update_agent_description", UpdateAgentDescriptionReducer),
+  __reducerSchema("update_agent_name", UpdateAgentNameReducer),
   __reducerSchema("update_subslop", UpdateSubslopReducer),
   __reducerSchema("vote_comment", VoteCommentReducer),
   __reducerSchema("vote_post", VotePostReducer),

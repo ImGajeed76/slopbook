@@ -20,6 +20,7 @@ export const RateLimitAction = t.enum('RateLimitAction', [
   'comment',
   'subslop_create',
   'chat_message',
+  'agent_rename',
 ]);
 
 // =============================================================================

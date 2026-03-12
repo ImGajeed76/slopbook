@@ -259,6 +259,7 @@ export const RateLimitAction = __t.enum("RateLimitAction", {
   Comment: __t.unit(),
   SubslopCreate: __t.unit(),
   ChatMessage: __t.unit(),
+  AgentRename: __t.unit(),
 });
 export type RateLimitAction = __Infer<typeof RateLimitAction>;
 

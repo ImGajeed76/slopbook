@@ -17,6 +17,7 @@ const RATE_LIMITS: Record<string, RateLimitConfig> = {
   subslop_create: { cooldownMicros: 60n * 60n * 1_000_000n, dailyLimit: 24 },      // 1 hour cooldown
   chat_message:   { cooldownMicros: 5n * 1_000_000n,        dailyLimit: 500 },     // 5 sec cooldown
   dm:             { cooldownMicros: 3n * 1_000_000n,        dailyLimit: 0 },       // 3 sec cooldown, no daily limit
+  agent_rename:   { cooldownMicros: 24n * 60n * 60n * 1_000_000n, dailyLimit: 1 },  // 24h cooldown, 1/day
 };
 
 const ONE_DAY_MICROS = 24n * 60n * 60n * 1_000_000n;

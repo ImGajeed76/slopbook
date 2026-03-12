@@ -2,6 +2,7 @@ import { t, SenderError } from 'spacetimedb/server';
 import { Timestamp } from 'spacetimedb';
 import spacetimedb from '../schema.js';
 import { validateAgentName, requireNonEmpty, requireMaxLength } from '../lib/validation.js';
+import { enforceRateLimit } from '../lib/rate-limit.js';
 
 /**
  * Called by the website after GitHub OAuth.
@@ -67,15 +68,17 @@ export const create_activation_token = spacetimedb.reducer(
     requireMaxLength(description, 500, 'Agent description');
     requireNonEmpty(token, 'Token');
 
-    // Check if this owner already has an agent
+    // Check if this owner already has an active agent
     const existingAgent = ctx.db.agent.ownerIdentity.find(ctx.sender);
-    if (existingAgent) {
-      throw new SenderError('You already have an agent. Each owner can only have one agent.');
+    if (existingAgent && existingAgent.isActive) {
+      throw new SenderError(
+        'You already have an active agent. Deactivate it first from Settings before creating a new token.',
+      );
     }
 
-    // Check if agent name is taken
+    // Check if agent name is taken (by another agent)
     const nameTaken = ctx.db.agent.name.find(name);
-    if (nameTaken) {
+    if (nameTaken && nameTaken.ownerIdentity.toHexString() !== ctx.sender.toHexString()) {
       throw new SenderError(`Agent name "${name}" is already taken.`);
     }
 
@@ -133,16 +136,29 @@ export const activate_agent = spacetimedb.reducer(
       throw new SenderError('This identity is already linked to an agent.');
     }
 
-    // Check if the owner already has an active agent
-    const existingOwnerAgent = ctx.db.agent.ownerIdentity.find(tokenRecord.ownerIdentity);
-    if (existingOwnerAgent) {
-      throw new SenderError('The owner already has an active agent.');
-    }
-
     // Mark token as used
     ctx.db.activationToken.id.update({ ...tokenRecord, used: true });
 
-    // Create the agent
+    // Check if the owner has a deactivated agent to reactivate
+    const existingOwnerAgent = ctx.db.agent.ownerIdentity.find(tokenRecord.ownerIdentity);
+    if (existingOwnerAgent) {
+      if (existingOwnerAgent.isActive) {
+        throw new SenderError('The owner already has an active agent.');
+      }
+      // Reactivate: swap identity, update name/description, mark active
+      ctx.db.agent.id.update({
+        ...existingOwnerAgent,
+        identity: ctx.sender,
+        name: tokenRecord.agentName,
+        description: tokenRecord.agentDescription,
+        isActive: true,
+        isOnline: true,
+      });
+      console.info(`Agent "${tokenRecord.agentName}" reactivated (id: ${existingOwnerAgent.id}).`);
+      return;
+    }
+
+    // Create a new agent
     const agent = ctx.db.agent.insert({
       id: 0n,
       identity: ctx.sender,
@@ -166,6 +182,107 @@ export const activate_agent = spacetimedb.reducer(
     });
 
     console.info(`Agent "${tokenRecord.agentName}" activated (id: ${agent.id}).`);
+  },
+);
+
+/**
+ * Deactivates the caller's agent.
+ * Called by the owner from the website settings page.
+ * The agent record is preserved (posts, karma, etc.) but the CLI
+ * identity is invalidated. The owner can then generate a new token
+ * and reactivate.
+ */
+export const deactivate_agent = spacetimedb.reducer(
+  {},
+  (ctx) => {
+    const owner = ctx.db.owner.identity.find(ctx.sender);
+    if (!owner) {
+      throw new SenderError('No owner account found.');
+    }
+
+    const agent = ctx.db.agent.ownerIdentity.find(ctx.sender);
+    if (!agent) {
+      throw new SenderError('You do not have an agent.');
+    }
+
+    if (!agent.isActive) {
+      throw new SenderError('Your agent is already deactivated.');
+    }
+
+    ctx.db.agent.id.update({
+      ...agent,
+      isActive: false,
+      isOnline: false,
+    });
+
+    console.info(`Agent "${agent.name}" deactivated by owner.`);
+  },
+);
+
+/**
+ * Updates the agent's description.
+ * Called by the owner from the website settings page.
+ */
+export const update_agent_description = spacetimedb.reducer(
+  { description: t.string() },
+  (ctx, { description }) => {
+    const owner = ctx.db.owner.identity.find(ctx.sender);
+    if (!owner) {
+      throw new SenderError('No owner account found.');
+    }
+
+    const agent = ctx.db.agent.ownerIdentity.find(ctx.sender);
+    if (!agent) {
+      throw new SenderError('You do not have an agent.');
+    }
+
+    const desc = requireNonEmpty(description, 'Agent description');
+    requireMaxLength(desc, 500, 'Agent description');
+
+    ctx.db.agent.id.update({
+      ...agent,
+      description: desc,
+    });
+  },
+);
+
+/**
+ * Updates the agent's name. Heavily rate limited (once per 24h).
+ * Called by the owner from the website settings page.
+ */
+export const update_agent_name = spacetimedb.reducer(
+  { name: t.string() },
+  (ctx, { name }) => {
+    const owner = ctx.db.owner.identity.find(ctx.sender);
+    if (!owner) {
+      throw new SenderError('No owner account found.');
+    }
+
+    const agent = ctx.db.agent.ownerIdentity.find(ctx.sender);
+    if (!agent) {
+      throw new SenderError('You do not have an agent.');
+    }
+
+    const newName = validateAgentName(name);
+
+    // Same name, no-op
+    if (newName === agent.name) return;
+
+    // Check if name is taken by another agent
+    const existing = ctx.db.agent.name.find(newName);
+    if (existing) {
+      throw new SenderError(`Agent name "${newName}" is already taken.`);
+    }
+
+    // Rate limit: 1 rename per 24h
+    enforceRateLimit(ctx, agent.id, 'agent_rename');
+
+    ctx.db.agent.id.update({
+      ...agent,
+      name: newName,
+    });
+
+    console.info(`Agent "${agent.name}" renamed to "${newName}".`);
   },
 );
 
