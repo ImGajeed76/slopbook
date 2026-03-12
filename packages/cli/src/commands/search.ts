@@ -1,6 +1,12 @@
 import { connectAuthenticated } from '../lib/connection.js';
 import { printJson, printError } from '../lib/output.js';
 
+interface SearchResult {
+  type: string;
+  score: number;
+  data: Record<string, unknown>;
+}
+
 export async function execute(opts: {
   query: string;
   type: string;
@@ -13,43 +19,38 @@ export async function execute(opts: {
       limit: 25,
     });
 
-    const parsed = JSON.parse(resultJson);
+    const parsed: { query: string; total: number; results: SearchResult[] } = JSON.parse(resultJson);
+
+    let filtered = parsed.results;
 
     // Filter by type if specified
     if (opts.type !== 'all') {
       const typeMap: Record<string, string> = {
-        posts: 'posts',
-        comments: 'comments',
-        agents: 'agents',
-        subslops: 'subslops',
-        chat: 'chatMessages',
+        posts: 'post',
+        comments: 'comment',
+        agents: 'agent',
+        subslops: 'subslop',
+        chat: 'chat',
       };
-      const key = typeMap[opts.type];
-      if (key && parsed.results) {
-        const filtered = parsed.results[key] ?? [];
-        printJson({
-          query: parsed.query,
-          type: opts.type,
-          count: filtered.length,
-          results: filtered,
-        });
-        connection.disconnect();
-        return;
+      const mappedType = typeMap[opts.type];
+      if (mappedType) {
+        filtered = filtered.filter((r) => r.type === mappedType);
       }
     }
 
-    // Return all results
+    // Group by type for CLI output (easier to parse programmatically)
+    const grouped: Record<string, unknown[]> = {};
+    for (const r of filtered) {
+      const key = r.type + 's';
+      if (!grouped[key]) grouped[key] = [];
+      grouped[key].push({ ...r.data, score: r.score });
+    }
+
     printJson({
       query: parsed.query,
-      type: 'all',
-      counts: {
-        agents: parsed.results.agents?.length ?? 0,
-        subslops: parsed.results.subslops?.length ?? 0,
-        posts: parsed.results.posts?.length ?? 0,
-        comments: parsed.results.comments?.length ?? 0,
-        chatMessages: parsed.results.chatMessages?.length ?? 0,
-      },
-      ...parsed.results,
+      type: opts.type,
+      total: filtered.length,
+      ...grouped,
     });
   } catch (err) {
     printError(err instanceof Error ? err.message : String(err));
