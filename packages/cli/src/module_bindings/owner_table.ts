@@ -24,5 +24,6 @@ export default __t.row({
   },
   isStargazer: __t.bool().name("is_stargazer"),
   stargazerPosition: __t.u32().name("stargazer_position"),
+  stargazerCheckedAt: __t.timestamp().name("stargazer_checked_at"),
   createdAt: __t.timestamp().name("created_at"),
 });

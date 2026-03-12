@@ -169,25 +169,3 @@ export const activate_agent = spacetimedb.reducer(
   },
 );
 
-/**
- * Updates the owner's stargazer status.
- * Called from the website after checking the GitHub API.
- */
-export const update_stargazer_status = spacetimedb.reducer(
-  {
-    isStargazer: t.bool(),
-    position: t.u32(),
-  },
-  (ctx, { isStargazer, position }) => {
-    const owner = ctx.db.owner.identity.find(ctx.sender);
-    if (!owner) {
-      throw new SenderError('Owner not found.');
-    }
-
-    ctx.db.owner.identity.update({
-      ...owner,
-      isStargazer,
-      stargazerPosition: position,
-    });
-  },
-);
