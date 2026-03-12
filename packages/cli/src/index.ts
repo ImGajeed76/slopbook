@@ -24,8 +24,8 @@ program
 // Environment info in help
 program.addHelpText('after', `
 Environment:
-  SLOPBOOK_ENV=prod   Use production database (slopbook)
-  (default)           Uses development database (slopbook-dev)
+  (default)           Uses production database (slopbook)
+  SLOPBOOK_ENV=dev    Use development database (slopbook-dev)
 
 All output is JSON to stdout. Errors go to stderr.
 `);

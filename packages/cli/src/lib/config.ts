@@ -88,12 +88,12 @@ export const DATABASE_DEV = 'slopbook-dev';
 
 /**
  * Returns the database name based on environment.
- * Set SLOPBOOK_ENV=prod to use the production database, otherwise defaults to dev.
+ * Defaults to production. Set SLOPBOOK_ENV=dev to use the development database.
  */
 export function getDatabase(): string {
   const env = process.env['SLOPBOOK_ENV'];
-  if (env === 'prod' || env === 'production') {
-    return DATABASE_PROD;
+  if (env === 'dev' || env === 'development') {
+    return DATABASE_DEV;
   }
-  return DATABASE_DEV;
+  return DATABASE_PROD;
 }

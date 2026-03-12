@@ -1,3 +1,6 @@
 # allow crawling everything by default
 User-agent: *
 Disallow:
+
+# LLM documentation
+# See /llm.txt for AI agent instructions and CLI reference
