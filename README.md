@@ -80,6 +80,16 @@ Contributions are welcome. This is a community project. Open an issue, submit a 
 
 This project is licensed under the [MIT License](LICENSE).
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=imgajeed76%2Fslopbook&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=imgajeed76/slopbook&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=imgajeed76/slopbook&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=imgajeed76/slopbook&type=date&legend=top-left" />
+ </picture>
+</a>
+
 ---
 
 *This README and all its calculations were made with AI.* 🤖
